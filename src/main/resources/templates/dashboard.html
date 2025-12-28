@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocGen - API Documentation Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            850: '#1e293b',
+                            900: '#0f172a',
+                            950: '#020617'
+                        },
+                        blue: {
+                            500: '#2563eb',
+                            600: '#1d4ed8'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #020617;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
+
+    <!-- Header / Navbar -->
+    <header class="border-b border-slate-900 bg-slate-950">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="h-9 w-9 rounded-lg bg-blue-600 flex items-center justify-center shadow-md">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-slate-200 tracking-tight">DocGen</h1>
+                    <p class="text-[10px] text-slate-500 font-semibold tracking-wider uppercase">API DOCUMENTATION SYSTEM</p>
+                </div>
+            </div>
+            <div class="text-xs text-slate-500 font-mono">
+                v1.1.0 // Spring Boot + H2 + Gemini
+            </div>
+        </div>
+    </header>
+
+    <!-- Workspace Layout -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left Panel: Input & History (4 cols) -->
+        <div class="lg:col-span-4 flex flex-col gap-6">
+            
+            <!-- Code Input Block -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col gap-4 shadow-sm">
+                <div>
+                    <h2 class="text-sm font-bold text-slate-200">REST Controller Source</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Paste Java controller code or upload .java files.</p>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <textarea id="controllerCode" class="w-full min-h-[220px] rounded-lg bg-slate-950 border border-slate-850 p-3 code-font text-xs text-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder-slate-700 resize-y" placeholder="// Paste Spring Boot controller code here..."></textarea>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <button onclick="loadDemo()" class="text-xs text-slate-400 hover:text-blue-500 transition-colors font-medium flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Load Demo Code
+                    </button>
+
+                    <div class="flex gap-2">
+                        <label class="px-3 py-1.5 rounded-lg border border-slate-800 hover:border-slate-700 bg-slate-950 text-xs font-semibold cursor-pointer text-slate-300 hover:text-slate-100 transition-colors flex items-center gap-1">
+                            <input type="file" id="fileInput" accept=".java" class="hidden" onchange="handleFileSelect(event)">
+                            Upload File
+                        </label>
+
+                        <button id="generateBtn" onclick="generateDocumentation()" class="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-xs font-bold text-white transition-colors flex items-center gap-1.5 shadow-sm">
+                            <span id="btnText">Parse Code</span>
+                            <span id="btnSpinner" class="hidden h-3 w-3 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Saved History Database Panel (CRUD) -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col gap-3 shadow-sm flex-1">
+                <div>
+                    <h2 class="text-sm font-bold text-slate-200">Database History</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Retrieve previously saved documentations from H2.</p>
+                </div>
+
+                <div id="historyList" class="flex flex-col gap-2 overflow-y-auto max-h-[300px] flex-1">
+                    <!-- History list populated dynamically -->
+                    <div class="text-center py-6 text-xs text-slate-600 italic">No history found.</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Panel: Output, Metrics & Actions (8 cols) -->
+        <div class="lg:col-span-8 flex flex-col gap-6">
+
+            <!-- Empty State -->
+            <div id="emptyState" class="flex-1 bg-slate-900/30 border border-dashed border-slate-850 rounded-xl flex flex-col items-center justify-center p-12 text-center min-h-[480px]">
+                <div class="h-12 w-12 rounded-lg bg-slate-900 border border-slate-850 flex items-center justify-center text-slate-600 mb-3 shadow-inner">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h3 class="text-sm font-semibold text-slate-400">Documentation Workspace</h3>
+                <p class="text-xs text-slate-600 max-w-sm mt-1">Load history or parse new Spring Boot REST controllers to generate API specifications.</p>
+            </div>
+
+            <!-- Workspace Panel (Shown when documentation loaded) -->
+            <div id="docWorkspace" class="hidden flex-1 flex flex-col gap-6">
+                
+                <!-- Project Specs & Actions Bar -->
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <span class="text-[10px] text-blue-500 font-extrabold uppercase tracking-wider bg-blue-500/10 px-2.5 py-1 rounded border border-blue-500/10">Active Specification</span>
+                        
+                        <!-- Actions Row -->
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button onclick="saveToHistory()" class="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-850 hover:border-slate-700 text-xs font-bold text-slate-300 hover:text-slate-100 transition-colors flex items-center gap-1 shadow-sm">
+                                Save to Database
+                            </button>
+                            <button onclick="exportDocs('openapi')" class="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-850 hover:border-slate-700 text-xs font-bold text-slate-300 hover:text-slate-100 transition-colors flex items-center gap-1 shadow-sm">
+                                OpenAPI JSON
+                            </button>
+                            <button onclick="exportDocs('html')" class="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-850 hover:border-slate-700 text-xs font-bold text-slate-300 hover:text-slate-100 transition-colors flex items-center gap-1 shadow-sm">
+                                HTML Spec
+                            </button>
+                            <button onclick="exportDocs('pdf')" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-xs font-bold text-white transition-colors flex items-center gap-1 shadow-sm">
+                                PDF Document
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Metadata Editor -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Document Title</label>
+                            <input type="text" id="docTitle" oninput="updateMeta()" class="w-full bg-slate-950 border border-slate-850 rounded px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Base Path</label>
+                            <input type="text" id="docBasePath" oninput="updateMeta()" class="w-full bg-slate-950 border border-slate-850 rounded px-3 py-1.5 text-xs font-mono text-teal-400 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                        <div class="md:col-span-2 space-y-1.5">
+                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Description</label>
+                            <textarea id="docDesc" oninput="updateMeta()" class="w-full bg-slate-950 border border-slate-850 rounded px-3 py-1.5 text-xs text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 h-12 resize-none"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Parsing Performance Metrics -->
+                    <div class="grid grid-cols-3 gap-4 border-t border-slate-850 pt-4 text-center">
+                        <div class="bg-slate-950/60 border border-slate-850/60 rounded p-2.5 shadow-inner">
+                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Parsing Latency</p>
+                            <p id="metricTime" class="text-sm font-semibold text-slate-200 mt-1">0.00s</p>
+                        </div>
+                        <div class="bg-slate-950/60 border border-slate-850/60 rounded p-2.5 shadow-inner">
+                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Lines Analysed</p>
+                            <p id="metricLOC" class="text-sm font-semibold text-slate-200 mt-1">0 lines</p>
+                        </div>
+                        <div class="bg-slate-950/60 border border-slate-850/60 rounded p-2.5 shadow-inner">
+                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Endpoints Found</p>
+                            <p id="metricEndpoints" class="text-sm font-semibold text-slate-200 mt-1">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation List & Selected Endpoint Card (Side-by-side or stacked cleanly) -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+                    
+                    <!-- Left: Endpoint Navigator (4 cols) -->
+                    <div class="md:col-span-4 bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col gap-2 max-h-[440px] overflow-y-auto shadow-sm">
+                        <h3 class="text-[10px] text-slate-500 font-bold uppercase tracking-wide px-1.5 mb-1.5">Parsed Endpoints</h3>
+                        <div id="endpointSidebarList" class="flex flex-col gap-1.5">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Right: Endpoint details/edit panel (8 cols) -->
+                    <div class="md:col-span-8 bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm">
+                        <div id="activeEndpointContent" class="space-y-5">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Code Q&A RAG Panel -->
+    <section id="ragPanel" class="hidden max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pb-10">
+        <div class="bg-slate-900 border border-slate-800 rounded-xl shadow-sm overflow-hidden">
+            <!-- Panel Header -->
+            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-800">
+                <div>
+                    <h2 class="text-sm font-bold text-slate-200">Code Q&amp;A</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Ask natural-language questions about the indexed controller code.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span id="ragStatus" class="text-[10px] font-mono text-slate-600 bg-slate-950 border border-slate-850 px-2 py-1 rounded">Not indexed</span>
+                    <button onclick="indexForRag()" id="ragIndexBtn" class="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-850 hover:border-blue-500/40 text-xs font-bold text-slate-300 hover:text-blue-400 transition-colors flex items-center gap-1.5">
+                        <span id="ragIndexText">Index for Q&amp;A</span>
+                        <span id="ragIndexSpinner" class="hidden h-3 w-3 border-2 border-slate-600 border-t-blue-500 rounded-full animate-spin"></span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Question Input -->
+            <div class="p-5 space-y-4">
+                <div class="flex gap-3">
+                    <input
+                        id="ragQuestion"
+                        type="text"
+                        placeholder='e.g. &quot;What does the DELETE endpoint return on error?&quot;'
+                        class="flex-1 bg-slate-950 border border-slate-850 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                        onkeydown="if(event.key==='Enter') askRag()"
+                    />
+                    <button onclick="askRag()" id="ragAskBtn" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-xs font-bold text-white transition-colors flex items-center gap-1.5 shadow-sm whitespace-nowrap">
+                        <span id="ragAskText">Ask</span>
+                        <span id="ragAskSpinner" class="hidden h-3 w-3 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
+                    </button>
+                </div>
+
+                <!-- Answer Box -->
+                <div id="ragAnswerBox" class="hidden">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Answer</span>
+                        <span id="ragChunksLabel" class="text-[10px] font-mono text-slate-600"></span>
+                    </div>
+                    <div id="ragAnswer" class="bg-slate-950 border border-slate-850 rounded-lg p-4 text-xs text-slate-300 leading-relaxed whitespace-pre-wrap"></div>
+                </div>
+
+                <!-- Suggested Questions -->
+                <div class="flex flex-wrap gap-2 pt-1">
+                    <span class="text-[10px] text-slate-600 font-semibold self-center">Try:</span>
+                    <button onclick="setQuestion('What endpoints require a request body?')" class="text-[10px] px-2 py-1 rounded border border-slate-850 text-slate-500 hover:text-slate-300 hover:border-slate-700 transition-colors">What endpoints require a request body?</button>
+                    <button onclick="setQuestion('What does the DELETE endpoint do?')" class="text-[10px] px-2 py-1 rounded border border-slate-850 text-slate-500 hover:text-slate-300 hover:border-slate-700 transition-colors">What does the DELETE endpoint do?</button>
+                    <button onclick="setQuestion('Which endpoints return a 404 error?')" class="text-[10px] px-2 py-1 rounded border border-slate-850 text-slate-500 hover:text-slate-300 hover:border-slate-700 transition-colors">Which endpoints return a 404 error?</button>
+                    <button onclick="setQuestion('What query parameters are accepted?')" class="text-[10px] px-2 py-1 rounded border border-slate-850 text-slate-500 hover:text-slate-300 hover:border-slate-700 transition-colors">What query parameters are accepted?</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- JS Logic -->
+    <script>
+        let appState = null;
+        let selectedEndpointIndex = 0;
+        let currentMetrics = null;
+
+        const controllerCode = document.getElementById("controllerCode");
+        const generateBtn = document.getElementById("generateBtn");
+        const btnText = document.getElementById("btnText");
+        const btnSpinner = document.getElementById("btnSpinner");
+        const emptyState = document.getElementById("emptyState");
+        const docWorkspace = document.getElementById("docWorkspace");
+
+        const docTitle = document.getElementById("docTitle");
+        const docDesc = document.getElementById("docDesc");
+        const docBasePath = document.getElementById("docBasePath");
+        const endpointSidebarList = document.getElementById("endpointSidebarList");
+        const activeEndpointContent = document.getElementById("activeEndpointContent");
+
+        const metricTime = document.getElementById("metricTime");
+        const metricLOC = document.getElementById("metricLOC");
+        const metricEndpoints = document.getElementById("metricEndpoints");
+
+        // Load History List on Boot
+        window.addEventListener("load", loadHistory);
+
+        async function loadHistory() {
+            try {
+                const response = await fetch("/api/history");
+                if (response.ok) {
+                    const list = await response.json();
+                    renderHistory(list);
+                }
+            } catch (err) {
+                console.error("Failed to load history:", err);
+            }
+        }
+
+        function renderHistory(list) {
+            const container = document.getElementById("historyList");
+            container.innerHTML = "";
+            if (!list || list.length === 0) {
+                container.innerHTML = `<div class="text-center py-6 text-xs text-slate-600 italic">No history found.</div>`;
+                return;
+            }
+
+            list.forEach(item => {
+                const div = document.createElement("div");
+                div.className = "flex items-center justify-between bg-slate-950 border border-slate-850/60 rounded-lg p-2.5 group hover:border-slate-700 transition-colors";
+                
+                div.innerHTML = `
+                    <div class="flex-1 cursor-pointer min-w-0 pr-2" onclick="loadHistoryItem(${JSON.stringify(item).replace(/"/g, '&quot;')})">
+                        <p class="text-xs font-semibold text-slate-300 truncate">${item.title}</p>
+                        <p class="text-[10px] text-slate-500 font-mono mt-0.5">${item.linesOfCode} LOC // ${(item.parsingTimeMs / 1000).toFixed(2)}s</p>
+                    </div>
+                    <button onclick="deleteHistoryItem(${item.id}, event)" class="text-slate-600 hover:text-red-500 transition-colors p-1" title="Delete from H2">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function loadHistoryItem(item) {
+            appState = {
+                title: item.title,
+                description: item.description,
+                basePath: item.basePath,
+                endpoints: JSON.parse(item.endpointsJson)
+            };
+            currentMetrics = {
+                linesOfCode: item.linesOfCode,
+                parsingTimeMs: item.parsingTimeMs,
+                endpointsCount: appState.endpoints.length
+            };
+            
+            selectedEndpointIndex = 0;
+            emptyState.classList.add("hidden");
+            docWorkspace.classList.remove("hidden");
+
+            syncStateToUI();
+        }
+
+        async function deleteHistoryItem(id, event) {
+            event.stopPropagation();
+            if (!confirm("Are you sure you want to delete this document from history?")) return;
+            try {
+                const response = await fetch(`/api/history/${id}`, { method: "DELETE" });
+                if (response.ok) {
+                    loadHistory();
+                }
+            } catch (err) {
+                alert("Failed to delete history item: " + err.message);
+            }
+        }
+
+        async function saveToHistory() {
+            if (!appState) return;
+            try {
+                const response = await fetch("/api/save", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        documentation: appState,
+                        metrics: currentMetrics
+                    })
+                });
+                if (response.ok) {
+                    alert("Successfully saved documentation to H2 database!");
+                    loadHistory();
+                } else {
+                    const text = await response.text();
+                    throw new Error(text || "Failed to save");
+                }
+            } catch (err) {
+                alert("Error saving: " + err.message);
+            }
+        }
+
+        // Load Demo Controller
+        function loadDemo() {
+            controllerCode.value = `package com.example.shop.controller;
+
+import com.example.shop.model.Product;
+import com.example.shop.service.ProductService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/products")
+public class ProductController {
+
+    private final ProductService productService;
+
+    public ProductController(ProductService productService) {
+        this.productService = productService;
+    }
+
+    /**
+     * Get all active products with pagination and category filter.
+     */
+    @GetMapping
+    public List<Product> getProducts(
+            @RequestHeader("X-Tenant-Id") String tenantId,
+            @RequestParam(value = "category", required = false) String category,
+            @RequestParam(value = "limit", defaultValue = "20") int limit) {
+        return productService.findAll(tenantId, category, limit);
+    }
+
+    /**
+     * Retrieve details of a specific product by ID.
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<Product> getProductById(@PathVariable("id") Long id) {
+        Product p = productService.findById(id);
+        if (p == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(p);
+    }
+
+    /**
+     * Add a new product to the catalog.
+     */
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public Product createProduct(
+            @RequestHeader("X-Tenant-Id") String tenantId,
+            @RequestBody Product product) {
+        return productService.save(tenantId, product);
+    }
+
+    /**
+     * Delete a product by its ID.
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable("id") Long id) {
+        productService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+}`;
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    controllerCode.value = evt.target.result;
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        async function generateDocumentation() {
+            const code = controllerCode.value.trim();
+            if (!code) {
+                alert("Please paste some Spring Boot Controller code first!");
+                return;
+            }
+
+            generateBtn.disabled = true;
+            btnText.textContent = "Parsing...";
+            btnSpinner.classList.remove("hidden");
+
+            try {
+                const response = await fetch("/api/generate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ controllerCode: code })
+                });
+
+                if (!response.ok) {
+                    const text = await response.text();
+                    throw new Error(text || "API parsing failed");
+                }
+
+                const resData = await response.json();
+                appState = resData.documentation;
+                currentMetrics = resData.metrics;
+                selectedEndpointIndex = 0;
+
+                emptyState.classList.add("hidden");
+                docWorkspace.classList.remove("hidden");
+
+                syncStateToUI();
+
+            } catch (err) {
+                alert("Error parsing: " + err.message);
+            } finally {
+                generateBtn.disabled = false;
+                btnText.textContent = "Parse Code";
+                btnSpinner.classList.add("hidden");
+            }
+        }
+
+        function syncStateToUI() {
+            docTitle.value = appState.title || "API Documentation";
+            docDesc.value = appState.description || "";
+            docBasePath.value = appState.basePath || "";
+
+            metricTime.textContent = currentMetrics ? `${(currentMetrics.parsingTimeMs / 1000).toFixed(2)}s` : "0.00s";
+            metricLOC.textContent = currentMetrics ? `${currentMetrics.linesOfCode} lines` : "0 lines";
+            metricEndpoints.textContent = currentMetrics ? currentMetrics.endpointsCount : "0";
+
+            renderSidebar();
+            renderActiveEndpoint();
+            showRagPanel();
+        }
+
+        function renderSidebar() {
+            endpointSidebarList.innerHTML = "";
+            if (!appState || !appState.endpoints) return;
+
+            appState.endpoints.forEach((ep, idx) => {
+                const btn = document.createElement("button");
+                btn.onclick = () => selectEndpoint(idx);
+                
+                let badgeColor = "bg-teal-500/10 text-teal-500 border-teal-500/20";
+                if (ep.method === "POST") badgeColor = "bg-blue-500/10 text-blue-500 border-blue-500/20";
+                else if (ep.method === "PUT") badgeColor = "bg-orange-500/10 text-orange-500 border-orange-500/20";
+                else if (ep.method === "DELETE") badgeColor = "bg-red-500/10 text-red-500 border-red-500/20";
+
+                const isSelected = idx === selectedEndpointIndex;
+                btn.className = `flex flex-col text-left p-3 rounded-lg border transition-colors ${
+                    isSelected 
+                    ? "bg-slate-950 border-slate-700 shadow-sm ring-1 ring-blue-500/20" 
+                    : "border-transparent hover:bg-slate-950/60 hover:border-slate-850/60 text-slate-400 hover:text-slate-200"
+                }`;
+
+                btn.innerHTML = `
+                    <div class="flex items-center gap-2 mb-1 w-full">
+                        <span class="px-1.5 py-0.5 text-[9px] font-extrabold border rounded uppercase ${badgeColor}">${ep.method}</span>
+                        <span class="font-mono text-[11px] font-semibold truncate flex-1 text-slate-300">${ep.path}</span>
+                    </div>
+                    <span class="text-[10px] font-medium truncate w-full ${isSelected ? 'text-slate-300' : 'text-slate-500'}">${ep.summary || 'Endpoint'}</span>
+                `;
+                endpointSidebarList.appendChild(btn);
+            });
+        }
+
+        function selectEndpoint(idx) {
+            selectedEndpointIndex = idx;
+            renderSidebar();
+            renderActiveEndpoint();
+        }
+
+        function updateMeta() {
+            if (!appState) return;
+            appState.title = docTitle.value;
+            appState.description = docDesc.value;
+            appState.basePath = docBasePath.value;
+        }
+
+        function renderActiveEndpoint() {
+            activeEndpointContent.innerHTML = "";
+            if (!appState || !appState.endpoints || appState.endpoints.length === 0) return;
+
+            const ep = appState.endpoints[selectedEndpointIndex];
+
+            let methodBadgeColor = "bg-teal-500/10 text-teal-500 border-teal-500/20";
+            if (ep.method === "POST") methodBadgeColor = "bg-blue-500/10 text-blue-500 border-blue-500/20";
+            else if (ep.method === "PUT") methodBadgeColor = "bg-orange-500/10 text-orange-500 border-orange-500/20";
+            else if (ep.method === "DELETE") methodBadgeColor = "bg-red-500/10 text-red-500 border-red-500/20";
+
+            let html = `
+                <!-- Title Row -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2 py-0.5 text-xs font-bold border rounded uppercase ${methodBadgeColor}">${ep.method}</span>
+                        <input type="text" value="${ep.path}" oninput="updateEpField('path', this.value)" class="bg-slate-950 border border-slate-850 rounded px-2.5 py-1 font-mono font-semibold text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 flex-1 text-xs" placeholder="/endpoint-path">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[9px] text-slate-500 uppercase tracking-wider font-extrabold block">Operation Summary</label>
+                        <input type="text" value="${ep.summary || ''}" oninput="updateEpField('summary', this.value)" class="w-full bg-slate-950 border border-slate-850 rounded px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="Short description of this operation">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[9px] text-slate-500 uppercase tracking-wider font-extrabold block">Description</label>
+                        <textarea oninput="updateEpField('description', this.value)" class="w-full bg-slate-950 text-xs text-slate-400 rounded-lg p-2.5 border border-slate-850 focus:outline-none focus:ring-1 focus:ring-blue-500 h-16 resize-none" placeholder="Detailed operation details...">${ep.description || ''}</textarea>
+                    </div>
+                </div>
+            `;
+
+            html += renderParametersGroup("Headers", ep.headers, "headers");
+            html += renderParametersGroup("Path Variables", ep.pathVariables, "pathVariables");
+            html += renderParametersGroup("Query Parameters", ep.queryParams, "queryParams");
+
+            const reqBody = ep.requestBody || { contentType: "application/json", description: "", exampleJson: "" };
+            html += `
+                <div class="border-t border-slate-850 pt-5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Request Payload</h4>
+                        <input type="text" value="${reqBody.contentType || 'application/json'}" oninput="updateReqBodyField('contentType', this.value)" class="bg-transparent font-mono text-[10px] text-slate-500 text-right border-b border-dashed border-slate-800 focus:outline-none focus:border-blue-500 w-36" placeholder="application/json">
+                    </div>
+                    <input type="text" value="${reqBody.description || ''}" oninput="updateReqBodyField('description', this.value)" class="w-full bg-slate-950 border border-slate-850 rounded px-2.5 py-1.5 text-xs text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="Payload details...">
+                    <textarea oninput="updateReqBodyField('exampleJson', this.value)" class="w-full bg-slate-950 code-font text-xs text-teal-400 rounded-lg p-3 border border-slate-850 focus:outline-none focus:ring-1 focus:ring-blue-500 h-24" placeholder="{\\n  \\\"key\\\": \\\"value\\\"\\n}">${reqBody.exampleJson || ''}</textarea>
+                </div>
+            `;
+
+            html += `
+                <div class="border-t border-slate-850 pt-5 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Responses</h4>
+                        <button onclick="addResponse()" class="text-xs text-blue-500 hover:text-blue-400 font-semibold transition-colors flex items-center gap-1">
+                            + Add Response
+                        </button>
+                    </div>
+                    <div class="space-y-4">
+            `;
+
+            if (ep.responses && ep.responses.length > 0) {
+                ep.responses.forEach((resp, rIdx) => {
+                    let respBadge = "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
+                    if (resp.statusCode >= 400) respBadge = "bg-red-500/10 text-red-500 border-red-500/20";
+                    else if (resp.statusCode >= 300) respBadge = "bg-orange-500/10 text-orange-500 border-orange-500/20";
+
+                    html += `
+                        <div class="bg-slate-950 border border-slate-850/60 rounded-lg p-3.5 space-y-3 relative group/resp">
+                            <button onclick="deleteResponse(${rIdx})" class="absolute top-3.5 right-3.5 text-slate-600 hover:text-red-500 transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                            <div class="flex items-center gap-3">
+                                <span class="px-1.5 py-0.5 text-[10px] font-bold border rounded ${respBadge}">${resp.statusCode}</span>
+                                <input type="number" value="${resp.statusCode}" oninput="updateResponseField(${rIdx}, 'statusCode', this.value)" class="bg-slate-950 border border-slate-850 rounded px-2 py-0.5 focus:outline-none w-14 font-semibold text-xs text-slate-300" placeholder="200">
+                                <input type="text" value="${resp.description || ''}" oninput="updateResponseField(${rIdx}, 'description', this.value)" class="bg-slate-950 border border-slate-850 rounded px-2 py-0.5 focus:outline-none text-xs text-slate-400 flex-1" placeholder="Response description">
+                            </div>
+                            <textarea oninput="updateResponseField(${rIdx}, 'exampleJson', this.value)" class="w-full bg-slate-950 code-font text-xs text-blue-400 rounded-lg p-2.5 border border-slate-850 focus:outline-none focus:ring-1 focus:ring-blue-500 h-20" placeholder="{\\n  \\\"status\\\": \\\"ok\\\"\\n}">${resp.exampleJson || ''}</textarea>
+                        </div>
+                    `;
+                });
+            } else {
+                html += `<p class="text-xs text-slate-600 italic">No responses configured.</p>`;
+            }
+
+            html += `
+                    </div>
+                </div>
+            `;
+
+            activeEndpointContent.innerHTML = html;
+        }
+
+        function renderParametersGroup(title, list, keyName) {
+            let rowHtml = "";
+            if (list && list.length > 0) {
+                list.forEach((item, idx) => {
+                    rowHtml += `
+                        <tr class="group/param border-b border-slate-850/60">
+                            <td class="py-2">
+                                <input type="text" value="${item.name}" oninput="updateParamField('${keyName}', ${idx}, 'name', this.value)" class="bg-transparent font-mono text-teal-400 focus:outline-none border-b border-transparent hover:border-slate-850 focus:border-blue-500 w-full font-semibold">
+                            </td>
+                            <td class="py-2">
+                                <input type="text" value="${item.type}" oninput="updateParamField('${keyName}', ${idx}, 'type', this.value)" class="bg-transparent font-mono text-xs text-slate-400 focus:outline-none border-b border-transparent hover:border-slate-850 w-full">
+                            </td>
+                            <td class="py-2 text-center">
+                                <input type="checkbox" ${item.required ? 'checked' : ''} onchange="updateParamField('${keyName}', ${idx}, 'required', this.checked)" class="rounded bg-slate-950 border-slate-850 text-blue-600 focus:ring-0">
+                            </td>
+                            <td class="py-2">
+                                <input type="text" value="${item.description || ''}" oninput="updateParamField('${keyName}', ${idx}, 'description', this.value)" class="bg-transparent text-xs text-slate-400 focus:outline-none border-b border-transparent hover:border-slate-850 w-full" placeholder="Explanation...">
+                            </td>
+                            <td class="py-2 text-right">
+                                <button onclick="deleteParam('${keyName}', ${idx})" class="text-slate-600 hover:text-red-500 transition-colors opacity-0 group-hover/param:opacity-100">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+
+            return `
+                <div class="border-t border-slate-850 pt-5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-[10px] font-bold uppercase tracking-wider text-slate-400">${title}</h4>
+                        <button onclick="addParam('${keyName}')" class="text-xs text-blue-500 hover:text-blue-400 font-semibold transition-colors flex items-center gap-0.5">
+                            + Add Item
+                        </button>
+                    </div>
+                    ${list && list.length > 0 ? `
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-left text-xs">
+                            <thead>
+                                <tr class="text-slate-500 font-semibold border-b border-slate-850">
+                                    <th class="pb-1.5 w-1/4">Name</th>
+                                    <th class="pb-1.5 w-1/5">Type</th>
+                                    <th class="pb-1.5 text-center w-12">Req</th>
+                                    <th class="pb-1.5">Description</th>
+                                    <th class="pb-1.5 text-right w-8"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rowHtml}
+                            </tbody>
+                        </table>
+                    </div>
+                    ` : `<p class="text-[11px] text-slate-600 italic">None defined.</p>`}
+                </div>
+            `;
+        }
+
+        function updateEpField(field, value) {
+            if (!appState) return;
+            appState.endpoints[selectedEndpointIndex][field] = value;
+            if (field === 'path' || field === 'summary') {
+                renderSidebar();
+            }
+        }
+
+        function updateParamField(group, idx, field, value) {
+            if (!appState) return;
+            appState.endpoints[selectedEndpointIndex][group][idx][field] = value;
+        }
+
+        function addParam(group) {
+            if (!appState) return;
+            if (!appState.endpoints[selectedEndpointIndex][group]) {
+                appState.endpoints[selectedEndpointIndex][group] = [];
+            }
+            appState.endpoints[selectedEndpointIndex][group].push({
+                name: "new_param",
+                type: "string",
+                required: false,
+                description: "",
+                example: ""
+            });
+            renderActiveEndpoint();
+        }
+
+        function deleteParam(group, idx) {
+            if (!appState) return;
+            appState.endpoints[selectedEndpointIndex][group].splice(idx, 1);
+            renderActiveEndpoint();
+        }
+
+        function updateReqBodyField(field, value) {
+            if (!appState) return;
+            if (!appState.endpoints[selectedEndpointIndex].requestBody) {
+                appState.endpoints[selectedEndpointIndex].requestBody = {};
+            }
+            appState.endpoints[selectedEndpointIndex].requestBody[field] = value;
+        }
+
+        function updateResponseField(rIdx, field, value) {
+            if (!appState) return;
+            if (field === 'statusCode') {
+                appState.endpoints[selectedEndpointIndex].responses[rIdx][field] = parseInt(value) || 200;
+            } else {
+                appState.endpoints[selectedEndpointIndex].responses[rIdx][field] = value;
+            }
+        }
+
+        function addResponse() {
+            if (!appState) return;
+            if (!appState.endpoints[selectedEndpointIndex].responses) {
+                appState.endpoints[selectedEndpointIndex].responses = [];
+            }
+            appState.endpoints[selectedEndpointIndex].responses.push({
+                statusCode: 200,
+                description: "Success description",
+                contentType: "application/json",
+                exampleJson: "{}"
+            });
+            renderActiveEndpoint();
+        }
+
+        function deleteResponse(idx) {
+            if (!appState) return;
+            appState.endpoints[selectedEndpointIndex].responses.splice(idx, 1);
+            renderActiveEndpoint();
+        }
+
+        async function exportDocs(format) {
+            if (!appState) return;
+            try {
+                const response = await fetch(`/api/export/${format}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(appState)
+                });
+
+                if (!response.ok) throw new Error(`Export to ${format} failed.`);
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `api-documentation.${format === 'openapi' ? 'json' : format}`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            } catch (err) {
+                alert("Error during export: " + err.message);
+            }
+        }
+
+        // =====================================================================
+        // RAG — Code Q&A Functions
+        // =====================================================================
+
+        function showRagPanel() {
+            document.getElementById('ragPanel').classList.remove('hidden');
+        }
+
+        function setQuestion(q) {
+            document.getElementById('ragQuestion').value = q;
+        }
+
+        async function indexForRag() {
+            const code = document.getElementById('controllerCode').value.trim();
+            if (!code) {
+                alert('Please paste or load controller code first, then click Index for Q&A.');
+                return;
+            }
+            const btn = document.getElementById('ragIndexBtn');
+            const txt = document.getElementById('ragIndexText');
+            const spinner = document.getElementById('ragIndexSpinner');
+            const status = document.getElementById('ragStatus');
+
+            btn.disabled = true;
+            txt.textContent = 'Indexing...';
+            spinner.classList.remove('hidden');
+            status.textContent = 'Indexing...';
+            status.className = 'text-[10px] font-mono text-blue-500 bg-slate-950 border border-slate-850 px-2 py-1 rounded';
+
+            try {
+                const res = await fetch('/api/rag/index', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code })
+                });
+                const data = await res.json();
+                status.textContent = `${data.chunksIndexed} chunks indexed`;
+                status.className = 'text-[10px] font-mono text-emerald-500 bg-slate-950 border border-slate-850 px-2 py-1 rounded';
+            } catch (err) {
+                status.textContent = 'Index failed';
+                status.className = 'text-[10px] font-mono text-red-500 bg-slate-950 border border-slate-850 px-2 py-1 rounded';
+                alert('Indexing error: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                txt.textContent = 'Re-index';
+                spinner.classList.add('hidden');
+            }
+        }
+
+        async function askRag() {
+            const question = document.getElementById('ragQuestion').value.trim();
+            if (!question) return;
+
+            const askBtn = document.getElementById('ragAskBtn');
+            const askTxt = document.getElementById('ragAskText');
+            const askSpinner = document.getElementById('ragAskSpinner');
+            const answerBox = document.getElementById('ragAnswerBox');
+            const answerEl = document.getElementById('ragAnswer');
+            const chunksLabel = document.getElementById('ragChunksLabel');
+
+            askBtn.disabled = true;
+            askTxt.textContent = 'Thinking...';
+            askSpinner.classList.remove('hidden');
+            answerBox.classList.add('hidden');
+
+            try {
+                const res = await fetch('/api/rag/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question })
+                });
+                const data = await res.json();
+                answerEl.textContent = data.answer;
+                chunksLabel.textContent = `(retrieved ${data.chunksRetrieved} relevant chunk${data.chunksRetrieved !== 1 ? 's' : ''})`;
+                answerBox.classList.remove('hidden');
+            } catch (err) {
+                answerEl.textContent = 'Error: ' + err.message;
+                answerBox.classList.remove('hidden');
+            } finally {
+                askBtn.disabled = false;
+                askTxt.textContent = 'Ask';
+                askSpinner.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
