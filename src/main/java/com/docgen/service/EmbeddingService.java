@@ -12,18 +12,18 @@ import java.net.http.HttpResponse;
 import java.util.Map;
 
 /**
- * EmbeddingService calls the Gemini text-embedding-004 model
- * to convert any text string into a 768-dimensional float vector.
+ * EmbeddingService calls the Gemini gemini-embedding-001 model
+ * to convert any text string into a 3072-dimensional float vector.
  *
- * Interview note: "text-embedding-004" is Google's latest embedding model.
- * It maps text into a high-dimensional vector space where semantically similar
- * texts have vectors that are close together (high cosine similarity).
+ * Interview note: "gemini-embedding-001" is Google's embedding model available
+ * via the Gemini API. It maps text into a high-dimensional vector space where
+ * semantically similar texts have vectors that are close together (high cosine similarity).
  */
 @Service
 public class EmbeddingService {
 
     private static final String EMBEDDING_URL =
-        "https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent";
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent";
 
     @Value("${gemini.api.key:}")
     private String apiKey;
