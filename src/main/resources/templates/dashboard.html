@@ -1,279 +1,184 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DocGen - API Documentation Generator</title>
+    <title>DocGen - AI Documentation Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        slate: {
-                            850: '#1e293b',
-                            900: '#0f172a',
-                            950: '#020617'
-                        },
-                        blue: {
-                            500: '#2563eb',
-                            600: '#1d4ed8'
-                        }
-                    }
-                }
-            }
+            theme: { extend: { colors: { slate: { 850: '#1e293b', 900: '#0f172a', 950: '#020617' } } } }
         }
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        .code-font {
-            font-family: 'Fira Code', monospace;
-        }
-        /* Custom Scrollbars */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #020617;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #475569;
-        }
+        body { background-color:#000055; background-image: repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,100,255,0.04) 3px,rgba(0,100,255,0.04) 4px), repeating-linear-gradient(90deg,transparent,transparent 3px,rgba(0,100,255,0.04) 3px,rgba(0,100,255,0.04) 4px); font-family:"Comic Sans MS","Comic Sans",cursive; margin:0; padding:0; color:#fff; }
+        .code-font { font-family:"Courier New","Lucida Console",monospace; }
+        .nav-btn { display:block; width:100%; padding:7px 10px; background:linear-gradient(to bottom,#ff9900,#cc5500); border:3px outset #ffcc00; color:#000; font-family:"Comic Sans MS",cursive; font-weight:bold; font-size:12px; text-align:center; cursor:pointer; margin-bottom:4px; letter-spacing:1px; }
+        .nav-btn:hover { background:linear-gradient(to bottom,#ffdd00,#ff9900); border-style:inset; }
+        .big-btn { padding:8px 18px; background:linear-gradient(to bottom,#00cc00,#005500); border:3px outset #00ff44; color:#fff; font-family:"Comic Sans MS",cursive; font-weight:bold; font-size:13px; cursor:pointer; }
+        .big-btn:hover { background:linear-gradient(to bottom,#00ff44,#00cc00); }
+        .big-btn:active { border-style:inset; }
+        .big-btn:disabled { opacity:0.5; cursor:not-allowed; }
+        .red-btn { padding:5px 12px; background:linear-gradient(to bottom,#cc0000,#550000); border:3px outset #ff4444; color:#ffff00; font-family:"Comic Sans MS",cursive; font-weight:bold; font-size:11px; cursor:pointer; }
+        .red-btn:hover { background:linear-gradient(to bottom,#ff3333,#cc0000); }
+        .blue-btn { padding:5px 12px; background:linear-gradient(to bottom,#0055cc,#002266); border:3px outset #44aaff; color:#fff; font-family:"Comic Sans MS",cursive; font-weight:bold; font-size:11px; cursor:pointer; }
+        .blue-btn:hover { background:linear-gradient(to bottom,#44aaff,#0055cc); }
+        .yellow-btn { padding:5px 12px; background:linear-gradient(to bottom,#ddaa00,#886600); border:3px outset #ffee00; color:#000; font-family:"Comic Sans MS",cursive; font-weight:bold; font-size:11px; cursor:pointer; }
+        .yellow-btn:hover { background:linear-gradient(to bottom,#ffee00,#ddaa00); }
+        .sec-hdr { background:linear-gradient(to right,#ff6600,#ffcc00,#ff6600); color:#000; font-family:Impact,"Arial Black",sans-serif; font-size:13px; font-weight:bold; padding:5px 10px; text-transform:uppercase; letter-spacing:2px; border:2px outset #ff9900; margin-bottom:0; }
+        .content-box { background:#000033; border:2px inset #003399; padding:8px; }
+        .orange-box { background:linear-gradient(to bottom,#1a0800,#0d0400); border:2px inset #cc4400; padding:8px; }
+        ::-webkit-scrollbar { width:8px; height:8px; }
+        ::-webkit-scrollbar-track { background:#000033; }
+        ::-webkit-scrollbar-thumb { background:#ff6600; border:1px outset #ff9900; }
+        @keyframes blink2k { 0%,100%{opacity:1} 50%{opacity:0} }
+        .blink { animation:blink2k 1.1s step-start infinite; }
+        @keyframes spin2k { to { transform:rotate(360deg); } }
+        .spin-icon { display:inline-block; animation:spin2k 0.7s linear infinite; }
+        .hidden { display:none !important; }
+        .star-div { text-align:center; color:#ffcc00; font-size:13px; letter-spacing:5px; padding:4px 0; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
+<body>
 
-    <!-- Header / Navbar -->
-    <header class="border-b border-slate-900 bg-slate-950">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="h-9 w-9 rounded-lg bg-blue-600 flex items-center justify-center shadow-md">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                </div>
-                <div>
-                    <h1 class="text-lg font-bold text-slate-200 tracking-tight">DocGen</h1>
-                    <p class="text-[10px] text-slate-500 font-semibold tracking-wider uppercase">API DOCUMENTATION SYSTEM</p>
-                </div>
+<table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(to bottom,#000022,#000077,#000022);border-bottom:5px outset #0055cc;">
+<tr>
+  <td width="80" style="padding:8px 12px;"><div style="width:58px;height:58px;background:linear-gradient(135deg,#ff6600,#ffcc00);border:4px outset #ff9900;display:flex;align-items:center;justify-content:center;"><span style="font-family:Impact;font-size:24px;color:#000;font-weight:bold;">DG</span></div></td>
+  <td style="padding:8px 4px;"><div style="font-family:Impact,sans-serif;font-size:34px;color:#ffcc00;text-shadow:3px 3px #ff4400,-1px -1px #cc0000;letter-spacing:5px;">&#9733; DOCGEN &#9733;</div><div style="font-family:'Comic Sans MS',cursive;font-size:12px;color:#88ccff;letter-spacing:2px;margin-top:2px;">AI-POWERED API DOCUMENTATION GENERATOR &mdash; v2.0</div></td>
+  <td align="right" style="padding:10px 20px;"><div class="blink" style="font-family:'Comic Sans MS',cursive;font-size:12px;color:#ffcc00;">&#9733; NOW WITH RAG A.I.! &#9733;</div><div style="font-family:'Courier New',monospace;font-size:11px;color:#aaaaff;margin-top:4px;">visitors: <strong style="color:#00ff99;">001337</strong></div><div style="font-family:'Comic Sans MS',cursive;font-size:10px;color:#555588;margin-top:3px;">best viewed in 800x600</div></td>
+</tr>
+</table>
+
+<div style="background:linear-gradient(to right,#000044,#000088,#000044);border-top:2px solid #0066cc;border-bottom:2px solid #0066cc;padding:3px 0;">
+  <marquee scrollamount="3" style="color:#ffff00;font-family:'Comic Sans MS',cursive;font-size:12px;">&#9733; Welcome to DocGen &mdash; The Internet's #1 AI-Powered API Documentation Tool! &#9733; Paste your Spring Boot controller and watch the MAGIC happen! &#9733; NEW: Code Q&amp;A powered by RAG technology! &#9733; 100% FREE! &#9733;</marquee>
+</div>
+
+<table width="100%" cellpadding="0" cellspacing="0">
+<tr valign="top">
+  <td width="148" style="background:linear-gradient(to bottom,#1a0800,#2a1000);border-right:4px outset #ff6600;padding:8px 6px;min-height:600px;">
+    <div style="font-family:Impact;font-size:13px;color:#ffcc00;text-align:center;padding:5px 0;letter-spacing:2px;border-bottom:2px solid #ff6600;margin-bottom:8px;">NAVIGATE</div>
+    <button class="nav-btn" onclick="document.getElementById('codeSection').scrollIntoView()">paste code</button>
+    <button class="nav-btn" onclick="document.getElementById('histSection').scrollIntoView()">history db</button>
+    <button class="nav-btn" onclick="document.getElementById('workSection').scrollIntoView()">view docs</button>
+    <button class="nav-btn" onclick="document.getElementById('ragSection').scrollIntoView()" style="background:linear-gradient(to bottom,#7700cc,#330066);border-color:#cc44ff;color:#fff;">ask the a.i.</button>
+    <div class="star-div" style="margin:10px 0;">&#9733; &#9733; &#9733;</div>
+    <div style="font-family:Impact;font-size:11px;color:#ff6600;text-align:center;margin-bottom:6px;letter-spacing:1px;">HOW TO USE</div>
+    <div style="font-family:'Comic Sans MS',cursive;font-size:10px;color:#999;padding:0 4px;line-height:1.7;">1. Paste Java code<br>2. Click GENERATE!!!<br>3. Edit &amp; Export<br>4. Index for AI Q&amp;A!</div>
+    <div class="star-div" style="margin:10px 0;">&#183; &#183; &#183;</div>
+    <div style="text-align:center;font-family:'Comic Sans MS',cursive;font-size:10px;"><div class="blink" style="color:#ffcc00;font-size:13px;">&#9733; FREE &#9733;</div><div style="color:#555577;margin-top:5px;">&copy; 2025 DocGen</div></div>
+  </td>
+  <td style="padding:10px;vertical-align:top;">
+
+    <a id="codeSection"></a>
+    <div class="sec-hdr">&#9889; STEP 1: PASTE YOUR SPRING BOOT CONTROLLER CODE &#9889;</div>
+    <div class="orange-box" style="margin-bottom:10px;">
+      <textarea id="controllerCode" style="width:100%;min-height:200px;resize:vertical;background:#00000f;border:2px inset #003399;color:#00ffaa;font-family:'Courier New',monospace;font-size:12px;padding:8px;box-sizing:border-box;" placeholder="// Paste Spring Boot controller code here... or click LOAD DEMO CODE!"></textarea>
+      <table width="100%" cellpadding="4" style="margin-top:8px;"><tr>
+        <td><button class="yellow-btn" onclick="loadDemo()">&#9889; Load Demo Code</button> &nbsp; <label class="blue-btn" style="display:inline-block;cursor:pointer;">&#128193; Upload .java File<input type="file" id="fileInput" accept=".java" style="display:none;" onchange="handleFileSelect(event)"></label></td>
+        <td align="right"><button id="generateBtn" onclick="generateDocumentation()" class="big-btn"><span id="btnText">&#9733; GENERATE DOCS!!! &#9733;</span><span id="btnSpinner" class="hidden spin-icon">&#9881;</span></button></td>
+      </tr></table>
+    </div>
+
+    <a id="histSection"></a>
+    <div class="sec-hdr" style="background:linear-gradient(to right,#002277,#0044cc,#002277);border-color:#44aaff;color:#fff;">&#128194; DATABASE HISTORY &mdash; SAVED DOCUMENTATIONS</div>
+    <div class="content-box" style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><span style="font-family:'Comic Sans MS',cursive;font-size:11px;color:#aaaaff;">Click a saved doc below to reload it into the workspace!</span><button class="red-btn" onclick="loadHistory()">&#8635; Refresh</button></div>
+      <div id="historyList" style="max-height:180px;overflow-y:auto;"></div>
+    </div>
+
+    <div id="emptyState" style="border:2px dashed #222255;background:#00001a;padding:40px;text-align:center;margin-bottom:10px;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+      <div style="font-family:Impact;font-size:26px;color:#222255;letter-spacing:5px;">AWAITING INPUT</div>
+      <div style="font-family:'Comic Sans MS',cursive;font-size:13px;color:#44446a;margin-top:10px;">Paste your controller and click<br><span style="color:#ff6600;font-weight:bold;">&#9733; GENERATE DOCS!!! &#9733;</span></div>
+      <div class="star-div" style="font-size:18px;margin-top:16px;">&#9733; &#9733; &#9733;</div>
+    </div>
+
+    <a id="workSection"></a>
+    <div id="docWorkspace" class="hidden" style="margin-bottom:10px;">
+      <table width="100%" cellpadding="0" cellspacing="6" style="margin-bottom:8px;"><tr valign="top">
+        <td width="58%">
+          <div class="sec-hdr" style="background:linear-gradient(to right,#004400,#009900,#004400);border-color:#00cc00;color:#fff;">&#128221; DOCUMENTATION DETAILS</div>
+          <div class="content-box">
+            <table width="100%" cellpadding="4">
+              <tr><td style="font-family:'Comic Sans MS',cursive;font-size:11px;color:#ffcc00;width:85px;white-space:nowrap;">Title:</td><td><input type="text" id="docTitle" oninput="updateMeta()" style="width:100%;background:#00000f;border:2px inset #005500;color:#00ffaa;font-family:'Courier New',monospace;font-size:12px;padding:4px;box-sizing:border-box;"></td></tr>
+              <tr><td style="font-family:'Comic Sans MS',cursive;font-size:11px;color:#ffcc00;">Base Path:</td><td><input type="text" id="docBasePath" oninput="updateMeta()" style="width:100%;background:#00000f;border:2px inset #005500;color:#00ffaa;font-family:'Courier New',monospace;font-size:12px;padding:4px;box-sizing:border-box;"></td></tr>
+              <tr><td style="font-family:'Comic Sans MS',cursive;font-size:11px;color:#ffcc00;">Description:</td><td><textarea id="docDesc" oninput="updateMeta()" style="width:100%;background:#00000f;border:2px inset #005500;color:#aaffaa;font-family:'Comic Sans MS',cursive;font-size:11px;padding:4px;height:48px;resize:none;box-sizing:border-box;"></textarea></td></tr>
+            </table>
+            <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+              <button class="big-btn" style="font-size:11px;padding:5px 12px;" onclick="saveToHistory()">&#128190; Save to DB</button>
+              <select id="exportFormat" style="background:#00001a;border:2px inset #003399;color:#fff;font-family:'Comic Sans MS',cursive;font-size:11px;padding:4px;"><option value="pdf">PDF Export</option><option value="html">HTML Export</option><option value="openapi">OpenAPI 3.0 JSON</option></select>
+              <button class="blue-btn" style="font-size:11px;padding:5px 12px;" onclick="exportDocs(document.getElementById('exportFormat').value)">&#128228; EXPORT!!!</button>
             </div>
-            <div class="text-xs text-slate-500 font-mono">
-                v1.1.0 // Spring Boot + H2 + Gemini
-            </div>
+          </div>
+        </td>
+        <td width="42%">
+          <div class="sec-hdr" style="background:linear-gradient(to right,#330033,#770077,#330033);border-color:#cc44cc;color:#fff;">&#128202; PERFORMANCE METRICS</div>
+          <div class="content-box">
+            <table width="100%" cellpadding="6">
+              <tr><td style="font-family:'Comic Sans MS',cursive;font-size:11px;color:#cc88ff;">&#8987; Parse Time:</td><td style="font-family:'Courier New',monospace;font-size:16px;color:#ff88ff;font-weight:bold;"><span id="metricTime">0.00s</span></td></tr>
+              <tr><td style="font-family:'Comic Sans MS',cursive;font-size:11px;color:#cc88ff;">&#128196; Lines of Code:</td><td style="font-family:'Courier New',monospace;font-size:16px;color:#ff88ff;font-weight:bold;"><span id="metricLOC">0 lines</span></td></tr>
+              <tr><td style="font-family:'Comic Sans MS',cursive;font-size:11px;color:#cc88ff;">&#128268; Endpoints:</td><td style="font-family:'Courier New',monospace;font-size:16px;color:#ff88ff;font-weight:bold;"><span id="metricEndpoints">0</span></td></tr>
+            </table>
+          </div>
+        </td>
+      </tr></table>
+
+      <div class="sec-hdr">&#128268; ENDPOINTS BROWSER &mdash; CLICK AN ENDPOINT TO VIEW DETAILS</div>
+      <table width="100%" cellpadding="0" cellspacing="0" style="border:3px outset #0044aa;background:#000011;"><tr valign="top">
+        <td width="220" style="background:#00001a;border-right:2px solid #002266;padding:6px;vertical-align:top;">
+          <div style="font-family:'Comic Sans MS',cursive;font-size:10px;color:#333366;margin-bottom:4px;text-align:center;">SELECT AN ENDPOINT</div>
+          <div id="endpointSidebarList" style="max-height:380px;overflow-y:auto;"></div>
+        </td>
+        <td style="padding:10px;vertical-align:top;background:#00000a;">
+          <div id="activeEndpointContent"><div style="text-align:center;padding:40px;color:#222244;font-family:'Comic Sans MS',cursive;font-size:13px;">&larr; Select an endpoint from the list on the left</div></div>
+        </td>
+      </tr></table>
+    </div>
+
+  </td>
+</tr>
+</table>
+
+<div class="star-div" style="padding:6px;background:#000033;border-top:2px solid #002266;border-bottom:2px solid #002266;font-size:15px;">&#10022; &#10022; &#10022; &#10022; &#10022; &#10022; &#10022; &#10022; &#10022; &#10022; &#10022; &#10022; &#10022; &#10022; &#10022; &#10022; &#10022; &#10022;</div>
+
+<a id="ragSection"></a>
+<div id="ragPanel" class="hidden" style="background:linear-gradient(to bottom,#150022,#0a0011);border-top:5px outset #8800cc;border-bottom:5px outset #8800cc;padding:12px;">
+  <div class="sec-hdr" style="background:linear-gradient(to right,#550099,#9900cc,#550099);border-color:#cc44ff;color:#fff;margin-bottom:10px;">&#129302; ASK THE A.I. &mdash; CODE Q&amp;A POWERED BY RAG TECHNOLOGY!!!</div>
+  <table width="100%" cellpadding="8"><tr valign="top">
+    <td width="60%">
+      <div style="font-family:'Comic Sans MS',cursive;font-size:12px;color:#bb88ff;margin-bottom:10px;"><b>HOW IT WORKS:</b> First index your code so the A.I. can read it. Then ask ANY question about your API!!!</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+        <button id="ragIndexBtn" onclick="indexForRag()" style="padding:7px 16px;background:linear-gradient(to bottom,#6600aa,#2a0055);border:3px outset #aa44ff;color:#fff;font-family:'Comic Sans MS',cursive;font-weight:bold;font-size:12px;cursor:pointer;"><span id="ragIndexText">&#9889; Index for Q&amp;A</span><span id="ragIndexSpinner" class="hidden spin-icon">&#9881;</span></button>
+        <span id="ragStatus" style="font-family:'Courier New',monospace;font-size:11px;color:#666688;background:#0a0022;border:1px inset #2a0055;padding:3px 8px;">Not indexed</span>
+      </div>
+      <div style="margin-bottom:8px;">
+        <div style="font-family:'Comic Sans MS',cursive;font-size:11px;color:#9966cc;margin-bottom:4px;">TYPE YOUR QUESTION HERE &mdash; PRESS ENTER OR CLICK ASK!!!</div>
+        <div style="display:flex;gap:6px;">
+          <input id="ragQuestion" type="text" placeholder="e.g. What does the DELETE endpoint return on error?" style="flex:1;background:#0a0022;border:2px inset #550099;color:#cc99ff;font-family:'Comic Sans MS',cursive;font-size:12px;padding:6px;" onkeydown="if(event.key==='Enter') askRag()">
+          <button id="ragAskBtn" onclick="askRag()" style="padding:6px 16px;background:linear-gradient(to bottom,#8800cc,#440066);border:3px outset #cc44ff;color:#ffff00;font-family:'Comic Sans MS',cursive;font-weight:bold;font-size:12px;cursor:pointer;"><span id="ragAskText">ASK!!!</span><span id="ragAskSpinner" class="hidden spin-icon">&#9881;</span></button>
         </div>
-    </header>
+      </div>
+      <div id="ragAnswerBox" class="hidden">
+        <div style="font-family:'Comic Sans MS',cursive;font-size:11px;color:#ffcc00;margin-bottom:4px;">&#9733; A.I. ANSWER: <span id="ragChunksLabel" style="color:#666;font-size:10px;"></span></div>
+        <div id="ragAnswer" style="background:#0a0022;border:2px inset #550099;color:#cc99ff;font-family:'Comic Sans MS',cursive;font-size:12px;padding:10px;line-height:1.7;white-space:pre-wrap;max-height:200px;overflow-y:auto;"></div>
+      </div>
+    </td>
+    <td width="40%" style="border-left:1px solid #2a0055;">
+      <div style="font-family:'Comic Sans MS',cursive;font-size:11px;color:#9966cc;margin-bottom:6px;">&#9889; TRY THESE QUESTIONS:</div>
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <button onclick="setQuestion('What endpoints require a request body?')" style="text-align:left;padding:5px 8px;background:#0a0022;border:1px solid #330055;color:#9966cc;font-family:'Comic Sans MS',cursive;font-size:11px;cursor:pointer;">&#9658; What endpoints require a request body?</button>
+        <button onclick="setQuestion('What does the DELETE endpoint do?')" style="text-align:left;padding:5px 8px;background:#0a0022;border:1px solid #330055;color:#9966cc;font-family:'Comic Sans MS',cursive;font-size:11px;cursor:pointer;">&#9658; What does the DELETE endpoint do?</button>
+        <button onclick="setQuestion('Which endpoints return a 404 error?')" style="text-align:left;padding:5px 8px;background:#0a0022;border:1px solid #330055;color:#9966cc;font-family:'Comic Sans MS',cursive;font-size:11px;cursor:pointer;">&#9658; Which endpoints return a 404 error?</button>
+        <button onclick="setQuestion('What query parameters are accepted?')" style="text-align:left;padding:5px 8px;background:#0a0022;border:1px solid #330055;color:#9966cc;font-family:'Comic Sans MS',cursive;font-size:11px;cursor:pointer;">&#9658; What query parameters are accepted?</button>
+      </div>
+    </td>
+  </tr></table>
+</div>
 
-    <!-- Workspace Layout -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        <!-- Left Panel: Input & History (4 cols) -->
-        <div class="lg:col-span-4 flex flex-col gap-6">
-            
-            <!-- Code Input Block -->
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col gap-4 shadow-sm">
-                <div>
-                    <h2 class="text-sm font-bold text-slate-200">REST Controller Source</h2>
-                    <p class="text-xs text-slate-500 mt-0.5">Paste Java controller code or upload .java files.</p>
-                </div>
+<table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(to right,#000022,#000055,#000022);border-top:4px outset #0044aa;">
+<tr><td style="padding:8px 16px;"><span style="font-family:'Comic Sans MS',cursive;font-size:11px;color:#8888cc;">&#9733; DocGen v2.0 &mdash; AI-Powered API Documentation Generator &#9733; &nbsp;|&nbsp; Made with &#9749; and Java</span></td><td align="right" style="padding:8px 16px;"><span style="font-family:'Courier New',monospace;font-size:10px;color:#333355;">Page last updated: January 2026 &nbsp;|&nbsp; &copy; DocGen.com</span></td></tr>
+</table>
 
-                <div class="flex flex-col gap-2">
-                    <textarea id="controllerCode" class="w-full min-h-[220px] rounded-lg bg-slate-950 border border-slate-850 p-3 code-font text-xs text-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder-slate-700 resize-y" placeholder="// Paste Spring Boot controller code here..."></textarea>
-                </div>
-
-                <div class="flex items-center justify-between">
-                    <button onclick="loadDemo()" class="text-xs text-slate-400 hover:text-blue-500 transition-colors font-medium flex items-center gap-1">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                        Load Demo Code
-                    </button>
-
-                    <div class="flex gap-2">
-                        <label class="px-3 py-1.5 rounded-lg border border-slate-800 hover:border-slate-700 bg-slate-950 text-xs font-semibold cursor-pointer text-slate-300 hover:text-slate-100 transition-colors flex items-center gap-1">
-                            <input type="file" id="fileInput" accept=".java" class="hidden" onchange="handleFileSelect(event)">
-                            Upload File
-                        </label>
-
-                        <button id="generateBtn" onclick="generateDocumentation()" class="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-xs font-bold text-white transition-colors flex items-center gap-1.5 shadow-sm">
-                            <span id="btnText">Parse Code</span>
-                            <span id="btnSpinner" class="hidden h-3 w-3 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Saved History Database Panel (CRUD) -->
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col gap-3 shadow-sm flex-1">
-                <div>
-                    <h2 class="text-sm font-bold text-slate-200">Database History</h2>
-                    <p class="text-xs text-slate-500 mt-0.5">Retrieve previously saved documentations from H2.</p>
-                </div>
-
-                <div id="historyList" class="flex flex-col gap-2 overflow-y-auto max-h-[300px] flex-1">
-                    <!-- History list populated dynamically -->
-                    <div class="text-center py-6 text-xs text-slate-600 italic">No history found.</div>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Right Panel: Output, Metrics & Actions (8 cols) -->
-        <div class="lg:col-span-8 flex flex-col gap-6">
-
-            <!-- Empty State -->
-            <div id="emptyState" class="flex-1 bg-slate-900/30 border border-dashed border-slate-850 rounded-xl flex flex-col items-center justify-center p-12 text-center min-h-[480px]">
-                <div class="h-12 w-12 rounded-lg bg-slate-900 border border-slate-850 flex items-center justify-center text-slate-600 mb-3 shadow-inner">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                </div>
-                <h3 class="text-sm font-semibold text-slate-400">Documentation Workspace</h3>
-                <p class="text-xs text-slate-600 max-w-sm mt-1">Load history or parse new Spring Boot REST controllers to generate API specifications.</p>
-            </div>
-
-            <!-- Workspace Panel (Shown when documentation loaded) -->
-            <div id="docWorkspace" class="hidden flex-1 flex flex-col gap-6">
-                
-                <!-- Project Specs & Actions Bar -->
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <span class="text-[10px] text-blue-500 font-extrabold uppercase tracking-wider bg-blue-500/10 px-2.5 py-1 rounded border border-blue-500/10">Active Specification</span>
-                        
-                        <!-- Actions Row -->
-                        <div class="flex flex-wrap items-center gap-2">
-                            <button onclick="saveToHistory()" class="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-850 hover:border-slate-700 text-xs font-bold text-slate-300 hover:text-slate-100 transition-colors flex items-center gap-1 shadow-sm">
-                                Save to Database
-                            </button>
-                            <button onclick="exportDocs('openapi')" class="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-850 hover:border-slate-700 text-xs font-bold text-slate-300 hover:text-slate-100 transition-colors flex items-center gap-1 shadow-sm">
-                                OpenAPI JSON
-                            </button>
-                            <button onclick="exportDocs('html')" class="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-850 hover:border-slate-700 text-xs font-bold text-slate-300 hover:text-slate-100 transition-colors flex items-center gap-1 shadow-sm">
-                                HTML Spec
-                            </button>
-                            <button onclick="exportDocs('pdf')" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-xs font-bold text-white transition-colors flex items-center gap-1 shadow-sm">
-                                PDF Document
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Metadata Editor -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="space-y-1.5">
-                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Document Title</label>
-                            <input type="text" id="docTitle" oninput="updateMeta()" class="w-full bg-slate-950 border border-slate-850 rounded px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                        </div>
-                        <div class="space-y-1.5">
-                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Base Path</label>
-                            <input type="text" id="docBasePath" oninput="updateMeta()" class="w-full bg-slate-950 border border-slate-850 rounded px-3 py-1.5 text-xs font-mono text-teal-400 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                        </div>
-                        <div class="md:col-span-2 space-y-1.5">
-                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Description</label>
-                            <textarea id="docDesc" oninput="updateMeta()" class="w-full bg-slate-950 border border-slate-850 rounded px-3 py-1.5 text-xs text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 h-12 resize-none"></textarea>
-                        </div>
-                    </div>
-
-                    <!-- Parsing Performance Metrics -->
-                    <div class="grid grid-cols-3 gap-4 border-t border-slate-850 pt-4 text-center">
-                        <div class="bg-slate-950/60 border border-slate-850/60 rounded p-2.5 shadow-inner">
-                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Parsing Latency</p>
-                            <p id="metricTime" class="text-sm font-semibold text-slate-200 mt-1">0.00s</p>
-                        </div>
-                        <div class="bg-slate-950/60 border border-slate-850/60 rounded p-2.5 shadow-inner">
-                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Lines Analysed</p>
-                            <p id="metricLOC" class="text-sm font-semibold text-slate-200 mt-1">0 lines</p>
-                        </div>
-                        <div class="bg-slate-950/60 border border-slate-850/60 rounded p-2.5 shadow-inner">
-                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Endpoints Found</p>
-                            <p id="metricEndpoints" class="text-sm font-semibold text-slate-200 mt-1">0</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Navigation List & Selected Endpoint Card (Side-by-side or stacked cleanly) -->
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-                    
-                    <!-- Left: Endpoint Navigator (4 cols) -->
-                    <div class="md:col-span-4 bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col gap-2 max-h-[440px] overflow-y-auto shadow-sm">
-                        <h3 class="text-[10px] text-slate-500 font-bold uppercase tracking-wide px-1.5 mb-1.5">Parsed Endpoints</h3>
-                        <div id="endpointSidebarList" class="flex flex-col gap-1.5">
-                            <!-- Populated dynamically -->
-                        </div>
-                    </div>
-
-                    <!-- Right: Endpoint details/edit panel (8 cols) -->
-                    <div class="md:col-span-8 bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm">
-                        <div id="activeEndpointContent" class="space-y-5">
-                            <!-- Populated dynamically -->
-                        </div>
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </main>
-
-    <!-- Code Q&A RAG Panel -->
-    <section id="ragPanel" class="hidden max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pb-10">
-        <div class="bg-slate-900 border border-slate-800 rounded-xl shadow-sm overflow-hidden">
-            <!-- Panel Header -->
-            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-800">
-                <div>
-                    <h2 class="text-sm font-bold text-slate-200">Code Q&amp;A</h2>
-                    <p class="text-xs text-slate-500 mt-0.5">Ask natural-language questions about the indexed controller code.</p>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span id="ragStatus" class="text-[10px] font-mono text-slate-600 bg-slate-950 border border-slate-850 px-2 py-1 rounded">Not indexed</span>
-                    <button onclick="indexForRag()" id="ragIndexBtn" class="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-850 hover:border-blue-500/40 text-xs font-bold text-slate-300 hover:text-blue-400 transition-colors flex items-center gap-1.5">
-                        <span id="ragIndexText">Index for Q&amp;A</span>
-                        <span id="ragIndexSpinner" class="hidden h-3 w-3 border-2 border-slate-600 border-t-blue-500 rounded-full animate-spin"></span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Question Input -->
-            <div class="p-5 space-y-4">
-                <div class="flex gap-3">
-                    <input
-                        id="ragQuestion"
-                        type="text"
-                        placeholder='e.g. &quot;What does the DELETE endpoint return on error?&quot;'
-                        class="flex-1 bg-slate-950 border border-slate-850 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                        onkeydown="if(event.key==='Enter') askRag()"
-                    />
-                    <button onclick="askRag()" id="ragAskBtn" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-xs font-bold text-white transition-colors flex items-center gap-1.5 shadow-sm whitespace-nowrap">
-                        <span id="ragAskText">Ask</span>
-                        <span id="ragAskSpinner" class="hidden h-3 w-3 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
-                    </button>
-                </div>
-
-                <!-- Answer Box -->
-                <div id="ragAnswerBox" class="hidden">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Answer</span>
-                        <span id="ragChunksLabel" class="text-[10px] font-mono text-slate-600"></span>
-                    </div>
-                    <div id="ragAnswer" class="bg-slate-950 border border-slate-850 rounded-lg p-4 text-xs text-slate-300 leading-relaxed whitespace-pre-wrap"></div>
-                </div>
-
-                <!-- Suggested Questions -->
-                <div class="flex flex-wrap gap-2 pt-1">
-                    <span class="text-[10px] text-slate-600 font-semibold self-center">Try:</span>
-                    <button onclick="setQuestion('What endpoints require a request body?')" class="text-[10px] px-2 py-1 rounded border border-slate-850 text-slate-500 hover:text-slate-300 hover:border-slate-700 transition-colors">What endpoints require a request body?</button>
-                    <button onclick="setQuestion('What does the DELETE endpoint do?')" class="text-[10px] px-2 py-1 rounded border border-slate-850 text-slate-500 hover:text-slate-300 hover:border-slate-700 transition-colors">What does the DELETE endpoint do?</button>
-                    <button onclick="setQuestion('Which endpoints return a 404 error?')" class="text-[10px] px-2 py-1 rounded border border-slate-850 text-slate-500 hover:text-slate-300 hover:border-slate-700 transition-colors">Which endpoints return a 404 error?</button>
-                    <button onclick="setQuestion('What query parameters are accepted?')" class="text-[10px] px-2 py-1 rounded border border-slate-850 text-slate-500 hover:text-slate-300 hover:border-slate-700 transition-colors">What query parameters are accepted?</button>
                 </div>
             </div>
         </div>
@@ -825,7 +730,7 @@ public class ProductController {
         }
 
         // =====================================================================
-        // RAG — Code Q&A Functions
+        // RAG â€” Code Q&A Functions
         // =====================================================================
 
         function showRagPanel() {
