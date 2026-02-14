@@ -1,822 +1,544 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DocGen - AI Documentation Generator</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: { extend: { colors: { slate: { 850: '#1e293b', 900: '#0f172a', 950: '#020617' } } } }
-        }
-    </script>
-    <style>
-        body { background-color:#000055; background-image: repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,100,255,0.04) 3px,rgba(0,100,255,0.04) 4px), repeating-linear-gradient(90deg,transparent,transparent 3px,rgba(0,100,255,0.04) 3px,rgba(0,100,255,0.04) 4px); font-family:"Comic Sans MS","Comic Sans",cursive; margin:0; padding:0; color:#fff; }
-        .code-font { font-family:"Courier New","Lucida Console",monospace; }
-        .nav-btn { display:block; width:100%; padding:7px 10px; background:linear-gradient(to bottom,#ff9900,#cc5500); border:3px outset #ffcc00; color:#000; font-family:"Comic Sans MS",cursive; font-weight:bold; font-size:12px; text-align:center; cursor:pointer; margin-bottom:4px; letter-spacing:1px; }
-        .nav-btn:hover { background:linear-gradient(to bottom,#ffdd00,#ff9900); border-style:inset; }
-        .big-btn { padding:8px 18px; background:linear-gradient(to bottom,#00cc00,#005500); border:3px outset #00ff44; color:#fff; font-family:"Comic Sans MS",cursive; font-weight:bold; font-size:13px; cursor:pointer; }
-        .big-btn:hover { background:linear-gradient(to bottom,#00ff44,#00cc00); }
-        .big-btn:active { border-style:inset; }
-        .big-btn:disabled { opacity:0.5; cursor:not-allowed; }
-        .red-btn { padding:5px 12px; background:linear-gradient(to bottom,#cc0000,#550000); border:3px outset #ff4444; color:#ffff00; font-family:"Comic Sans MS",cursive; font-weight:bold; font-size:11px; cursor:pointer; }
-        .red-btn:hover { background:linear-gradient(to bottom,#ff3333,#cc0000); }
-        .blue-btn { padding:5px 12px; background:linear-gradient(to bottom,#0055cc,#002266); border:3px outset #44aaff; color:#fff; font-family:"Comic Sans MS",cursive; font-weight:bold; font-size:11px; cursor:pointer; }
-        .blue-btn:hover { background:linear-gradient(to bottom,#44aaff,#0055cc); }
-        .yellow-btn { padding:5px 12px; background:linear-gradient(to bottom,#ddaa00,#886600); border:3px outset #ffee00; color:#000; font-family:"Comic Sans MS",cursive; font-weight:bold; font-size:11px; cursor:pointer; }
-        .yellow-btn:hover { background:linear-gradient(to bottom,#ffee00,#ddaa00); }
-        .sec-hdr { background:linear-gradient(to right,#ff6600,#ffcc00,#ff6600); color:#000; font-family:Impact,"Arial Black",sans-serif; font-size:13px; font-weight:bold; padding:5px 10px; text-transform:uppercase; letter-spacing:2px; border:2px outset #ff9900; margin-bottom:0; }
-        .content-box { background:#000033; border:2px inset #003399; padding:8px; }
-        .orange-box { background:linear-gradient(to bottom,#1a0800,#0d0400); border:2px inset #cc4400; padding:8px; }
-        ::-webkit-scrollbar { width:8px; height:8px; }
-        ::-webkit-scrollbar-track { background:#000033; }
-        ::-webkit-scrollbar-thumb { background:#ff6600; border:1px outset #ff9900; }
-        @keyframes blink2k { 0%,100%{opacity:1} 50%{opacity:0} }
-        .blink { animation:blink2k 1.1s step-start infinite; }
-        @keyframes spin2k { to { transform:rotate(360deg); } }
-        .spin-icon { display:inline-block; animation:spin2k 0.7s linear infinite; }
-        .hidden { display:none !important; }
-        .star-div { text-align:center; color:#ffcc00; font-size:13px; letter-spacing:5px; padding:4px 0; }
-    </style>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>DocGen - AI-Powered API Documentation Generator</title>
+<style type="text/css">
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 12px; color: #333333; background-color: #FFFFFF; }
+a { color: #003399; text-decoration: underline; cursor: pointer; }
+a:hover { color: #CC6600; }
+input, textarea, select { font-family: Verdana, Arial, sans-serif; font-size: 11px; }
+#header { border-bottom: 2px solid #AAAAAA; padding: 6px 10px; background: #FFFFFF; }
+.logo-text { font-family: "Times New Roman", Georgia, serif; font-size: 26px; font-weight: bold; color: #000000; letter-spacing: -1px; }
+.logo-dot { color: #FF9900; }
+.tagline { font-size: 10px; color: #999999; display: block; margin-top: 1px; }
+.header-links { font-size: 11px; color: #666666; text-align: right; }
+.header-links a { color: #003399; font-size: 11px; text-decoration: none; }
+.header-links a:hover { text-decoration: underline; color: #CC6600; }
+.header-sep { color: #BBBBBB; padding: 0 4px; }
+#nav-main { background-color: #336633; border-bottom: 2px solid #224422; padding: 0 8px; }
+.nav-tab { display: inline-block; font-size: 11px; font-weight: bold; color: #FFFFFF; text-decoration: none; padding: 5px 12px; border: 1px solid #669966; border-bottom: none; background: #336633; cursor: pointer; margin-right: 2px; position: relative; top: 2px; }
+.nav-tab:hover { background: #558855; color: #FFFFFF; text-decoration: none; }
+.nav-tab.active { background: #FFFFFF; color: #336633; border-color: #669966; }
+#nav-sub { background-color: #999933; padding: 3px 12px; border-bottom: 1px solid #776622; }
+.subnav-link { font-size: 11px; color: #FFFFFF; text-decoration: none; cursor: pointer; }
+.subnav-link:hover { text-decoration: underline; color: #FFFF99; }
+.subnav-arrow { color: #CCCC66; padding: 0 5px; }
+#input-bar { background: #FFFFEE; border-bottom: 2px solid #CCCC99; padding: 8px 10px; }
+.input-label { font-size: 11px; font-weight: bold; color: #333333; white-space: nowrap; padding-right: 8px; vertical-align: top; padding-top: 4px; }
+.btn-go { background: #FF9900; border: 2px outset #CC7700; font-family: Verdana, Arial, sans-serif; font-size: 12px; font-weight: bold; padding: 5px 18px; cursor: pointer; color: #FFFFFF; display: block; width: 100%; margin-bottom: 4px; }
+.btn-go:hover { background: #DD8800; }
+.btn-go:disabled { background: #CCCCCC; cursor: default; }
+.btn-small { background: #FFFFCC; border: 1px outset #CCCC99; font-family: Verdana, Arial, sans-serif; font-size: 10px; padding: 2px 8px; cursor: pointer; color: #333333; display: block; width: 100%; margin-bottom: 3px; text-align: left; }
+.btn-small:hover { background: #FFFF99; }
+.btn-inline { background: #FFFFCC; border: 1px outset #CCCC99; font-family: Verdana, Arial, sans-serif; font-size: 10px; padding: 2px 8px; cursor: pointer; color: #003399; margin: 1px 2px 1px 0; }
+.btn-inline:hover { background: #FFFF99; }
+.btn-ask { background: #336633; border: 2px outset #224422; font-family: Verdana, Arial, sans-serif; font-size: 11px; font-weight: bold; padding: 4px 16px; cursor: pointer; color: #FFFFFF; white-space: nowrap; }
+.btn-ask:hover { background: #447744; }
+.btn-ask:disabled { background: #999999; }
+.btn-index { background: #FFFFCC; border: 1px outset #CCCC99; font-family: Verdana, Arial, sans-serif; font-size: 10px; font-weight: bold; padding: 3px 10px; cursor: pointer; color: #336633; }
+.btn-index:hover { background: #FFFF99; }
+.btn-del { background: #FFCCCC; border: 1px outset #CC9999; font-size: 9px; font-family: Verdana; padding: 1px 4px; cursor: pointer; color: #CC0000; }
+.btn-del:hover { background: #FFAAAA; }
+#layout-table { width: 100%; border-collapse: collapse; }
+.col-left { width: 185px; min-width: 185px; max-width: 185px; vertical-align: top; border-right: 2px solid #CCCCCC; padding: 6px 6px 6px 8px; }
+.col-center { vertical-align: top; padding: 6px 10px; }
+.col-right { width: 178px; min-width: 178px; max-width: 178px; vertical-align: top; border-left: 2px solid #CCCCCC; padding: 6px 8px; }
+.sec-head { font-size: 12px; font-weight: bold; color: #CC6600; background: #FFFFCC; border-top: 2px solid #CC9900; border-bottom: 1px solid #CCCC99; padding: 3px 5px; margin: 0 0 5px 0; }
+.sec-head-green { font-size: 11px; font-weight: bold; color: #FFFFFF; background: #336633; padding: 3px 5px; margin: 0 0 4px 0; }
+.sec-head-full { font-size: 13px; font-weight: bold; color: #CC6600; background: #FFFFCC; border-top: 2px solid #CC9900; border-bottom: 1px solid #CCCC99; padding: 4px 8px; margin: 0; }
+.sidebar-link { display: block; font-size: 11px; color: #003399; text-decoration: underline; padding: 2px 0; cursor: pointer; background: none; border: none; text-align: left; width: 100%; font-family: Verdana, Arial, sans-serif; }
+.sidebar-link:hover { color: #CC6600; }
+.ep-item { border-bottom: 1px solid #EEEEEE; padding: 4px 2px; cursor: pointer; font-size: 11px; }
+.ep-item:hover { background: #FFFFEE; }
+.ep-item.selected { background: #FFFFCC; border-left: 3px solid #CC6600; padding-left: 3px; }
+.method-badge { font-size: 9px; font-weight: bold; padding: 1px 3px; border: 1px solid #999999; display: inline-block; min-width: 32px; text-align: center; font-family: Verdana, Arial, sans-serif; }
+.m-get    { background: #CCFFCC; color: #006600; border-color: #66BB66; }
+.m-post   { background: #CCDDFF; color: #000099; border-color: #6688CC; }
+.m-put    { background: #FFFFCC; color: #996600; border-color: #CCAA44; }
+.m-delete { background: #FFCCCC; color: #CC0000; border-color: #CC6666; }
+.m-patch  { background: #EECCFF; color: #660099; border-color: #BB66CC; }
+.detail-label { font-size: 10px; font-weight: bold; color: #666666; text-transform: uppercase; letter-spacing: 0.5px; margin: 8px 0 3px 0; }
+.editable-field { border: 1px solid #CCCCCC; padding: 3px 5px; font-family: Verdana, Arial, sans-serif; font-size: 11px; background: #FAFAFA; width: 100%; }
+.editable-field:focus { outline: 1px solid #CC9900; background: #FFFFFF; }
+.param-table { border-collapse: collapse; width: 100%; font-size: 11px; margin: 4px 0; }
+.param-table th { background: #DDDDBB; padding: 2px 6px; text-align: left; font-size: 10px; border: 1px solid #AAAAAA; font-weight: bold; }
+.param-table td { padding: 3px 6px; border: 1px solid #DDDDDD; vertical-align: top; }
+.param-table tr:nth-child(even) td { background: #FAFAF0; }
+.param-input { border: none; background: transparent; width: 100%; font-family: Verdana, Arial, sans-serif; font-size: 11px; }
+.param-input:focus { outline: 1px solid #CC9900; background: #FFFFD0; }
+.metric-box { background: #FFFFCC; border: 1px solid #CCCC99; padding: 4px 6px; margin: 3px 0; font-size: 11px; }
+.metric-val { font-weight: bold; color: #CC6600; }
+.hist-item { border-bottom: 1px solid #EEEEEE; padding: 4px 2px; font-size: 11px; }
+.hist-link { display: block; color: #003399; text-decoration: underline; cursor: pointer; font-size: 11px; font-weight: bold; }
+.hist-link:hover { color: #CC6600; }
+.hist-meta { font-size: 9px; color: #999999; font-family: "Courier New", monospace; }
+.s-2xx { color: #006600; font-weight: bold; font-family: "Courier New", monospace; }
+.s-3xx { color: #996600; font-weight: bold; font-family: "Courier New", monospace; }
+.s-4xx { color: #CC0000; font-weight: bold; font-family: "Courier New", monospace; }
+.s-5xx { color: #990000; font-weight: bold; font-family: "Courier New", monospace; }
+#ragPanel { display: none; border-top: 2px solid #CCCCCC; }
+.rag-status { font-size: 10px; font-family: "Courier New", monospace; padding: 2px 6px; border: 1px solid #CCCCCC; background: #FFCCCC; color: #CC0000; }
+.rag-status.indexed { background: #CCFFCC; color: #006600; border-color: #99CC99; }
+.resp-box { border: 1px solid #DDDDDD; background: #FAFAFA; padding: 6px; margin: 4px 0; }
+.spinner { display: inline-block; width: 10px; height: 10px; border: 2px solid #CCCCCC; border-top-color: #336633; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-left: 3px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.hidden { display: none !important; }
+.divider { border: 0; border-top: 1px solid #CCCCCC; margin: 7px 0; }
+.info-banner { background: #FFFFEE; border: 1px solid #CCCC99; padding: 10px 12px; font-size: 11px; line-height: 1.6; margin-bottom: 8px; }
+.empty-state { text-align: center; padding: 16px; color: #AAAAAA; font-size: 11px; font-style: italic; }
+.ep-path-text { font-family: "Courier New", monospace; font-size: 10px; }
+#footer { background: #CCCC99; border-top: 2px solid #999966; padding: 6px 10px; text-align: center; font-size: 10px; color: #666666; margin-top: 10px; }
+#footer a { color: #003399; font-size: 10px; }
+#controllerCode { width: 100%; font-family: "Courier New", Courier, monospace; font-size: 11px; border: 1px solid #999999; resize: vertical; background: #FAFAFA; padding: 4px; }
+#controllerCode:focus { outline: 1px solid #CC9900; background: #FFFFFF; }
+</style>
 </head>
 <body>
 
-<table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(to bottom,#000022,#000077,#000022);border-bottom:5px outset #0055cc;">
-<tr>
-  <td width="80" style="padding:8px 12px;"><div style="width:58px;height:58px;background:linear-gradient(135deg,#ff6600,#ffcc00);border:4px outset #ff9900;display:flex;align-items:center;justify-content:center;"><span style="font-family:Impact;font-size:24px;color:#000;font-weight:bold;">DG</span></div></td>
-  <td style="padding:8px 4px;"><div style="font-family:Impact,sans-serif;font-size:34px;color:#ffcc00;text-shadow:3px 3px #ff4400,-1px -1px #cc0000;letter-spacing:5px;">&#9733; DOCGEN &#9733;</div><div style="font-family:'Comic Sans MS',cursive;font-size:12px;color:#88ccff;letter-spacing:2px;margin-top:2px;">AI-POWERED API DOCUMENTATION GENERATOR &mdash; v2.0</div></td>
-  <td align="right" style="padding:10px 20px;"><div class="blink" style="font-family:'Comic Sans MS',cursive;font-size:12px;color:#ffcc00;">&#9733; NOW WITH RAG A.I.! &#9733;</div><div style="font-family:'Courier New',monospace;font-size:11px;color:#aaaaff;margin-top:4px;">visitors: <strong style="color:#00ff99;">001337</strong></div><div style="font-family:'Comic Sans MS',cursive;font-size:10px;color:#555588;margin-top:3px;">best viewed in 800x600</div></td>
-</tr>
-</table>
-
-<div style="background:linear-gradient(to right,#000044,#000088,#000044);border-top:2px solid #0066cc;border-bottom:2px solid #0066cc;padding:3px 0;">
-  <marquee scrollamount="3" style="color:#ffff00;font-family:'Comic Sans MS',cursive;font-size:12px;">&#9733; Welcome to DocGen &mdash; The Internet's #1 AI-Powered API Documentation Tool! &#9733; Paste your Spring Boot controller and watch the MAGIC happen! &#9733; NEW: Code Q&amp;A powered by RAG technology! &#9733; 100% FREE! &#9733;</marquee>
-</div>
-
-<table width="100%" cellpadding="0" cellspacing="0">
-<tr valign="top">
-  <td width="148" style="background:linear-gradient(to bottom,#1a0800,#2a1000);border-right:4px outset #ff6600;padding:8px 6px;min-height:600px;">
-    <div style="font-family:Impact;font-size:13px;color:#ffcc00;text-align:center;padding:5px 0;letter-spacing:2px;border-bottom:2px solid #ff6600;margin-bottom:8px;">NAVIGATE</div>
-    <button class="nav-btn" onclick="document.getElementById('codeSection').scrollIntoView()">paste code</button>
-    <button class="nav-btn" onclick="document.getElementById('histSection').scrollIntoView()">history db</button>
-    <button class="nav-btn" onclick="document.getElementById('workSection').scrollIntoView()">view docs</button>
-    <button class="nav-btn" onclick="document.getElementById('ragSection').scrollIntoView()" style="background:linear-gradient(to bottom,#7700cc,#330066);border-color:#cc44ff;color:#fff;">ask the a.i.</button>
-    <div class="star-div" style="margin:10px 0;">&#9733; &#9733; &#9733;</div>
-    <div style="font-family:Impact;font-size:11px;color:#ff6600;text-align:center;margin-bottom:6px;letter-spacing:1px;">HOW TO USE</div>
-    <div style="font-family:'Comic Sans MS',cursive;font-size:10px;color:#999;padding:0 4px;line-height:1.7;">1. Paste Java code<br>2. Click GENERATE!!!<br>3. Edit &amp; Export<br>4. Index for AI Q&amp;A!</div>
-    <div class="star-div" style="margin:10px 0;">&#183; &#183; &#183;</div>
-    <div style="text-align:center;font-family:'Comic Sans MS',cursive;font-size:10px;"><div class="blink" style="color:#ffcc00;font-size:13px;">&#9733; FREE &#9733;</div><div style="color:#555577;margin-top:5px;">&copy; 2025 DocGen</div></div>
-  </td>
-  <td style="padding:10px;vertical-align:top;">
-
-    <a id="codeSection"></a>
-    <div class="sec-hdr">&#9889; STEP 1: PASTE YOUR SPRING BOOT CONTROLLER CODE &#9889;</div>
-    <div class="orange-box" style="margin-bottom:10px;">
-      <textarea id="controllerCode" style="width:100%;min-height:200px;resize:vertical;background:#00000f;border:2px inset #003399;color:#00ffaa;font-family:'Courier New',monospace;font-size:12px;padding:8px;box-sizing:border-box;" placeholder="// Paste Spring Boot controller code here... or click LOAD DEMO CODE!"></textarea>
-      <table width="100%" cellpadding="4" style="margin-top:8px;"><tr>
-        <td><button class="yellow-btn" onclick="loadDemo()">&#9889; Load Demo Code</button> &nbsp; <label class="blue-btn" style="display:inline-block;cursor:pointer;">&#128193; Upload .java File<input type="file" id="fileInput" accept=".java" style="display:none;" onchange="handleFileSelect(event)"></label></td>
-        <td align="right"><button id="generateBtn" onclick="generateDocumentation()" class="big-btn"><span id="btnText">&#9733; GENERATE DOCS!!! &#9733;</span><span id="btnSpinner" class="hidden spin-icon">&#9881;</span></button></td>
-      </tr></table>
-    </div>
-
-    <a id="histSection"></a>
-    <div class="sec-hdr" style="background:linear-gradient(to right,#002277,#0044cc,#002277);border-color:#44aaff;color:#fff;">&#128194; DATABASE HISTORY &mdash; SAVED DOCUMENTATIONS</div>
-    <div class="content-box" style="margin-bottom:10px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><span style="font-family:'Comic Sans MS',cursive;font-size:11px;color:#aaaaff;">Click a saved doc below to reload it into the workspace!</span><button class="red-btn" onclick="loadHistory()">&#8635; Refresh</button></div>
-      <div id="historyList" style="max-height:180px;overflow-y:auto;"></div>
-    </div>
-
-    <div id="emptyState" style="border:2px dashed #222255;background:#00001a;padding:40px;text-align:center;margin-bottom:10px;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-      <div style="font-family:Impact;font-size:26px;color:#222255;letter-spacing:5px;">AWAITING INPUT</div>
-      <div style="font-family:'Comic Sans MS',cursive;font-size:13px;color:#44446a;margin-top:10px;">Paste your controller and click<br><span style="color:#ff6600;font-weight:bold;">&#9733; GENERATE DOCS!!! &#9733;</span></div>
-      <div class="star-div" style="font-size:18px;margin-top:16px;">&#9733; &#9733; &#9733;</div>
-    </div>
-
-    <a id="workSection"></a>
-    <div id="docWorkspace" class="hidden" style="margin-bottom:10px;">
-      <table width="100%" cellpadding="0" cellspacing="6" style="margin-bottom:8px;"><tr valign="top">
-        <td width="58%">
-          <div class="sec-hdr" style="background:linear-gradient(to right,#004400,#009900,#004400);border-color:#00cc00;color:#fff;">&#128221; DOCUMENTATION DETAILS</div>
-          <div class="content-box">
-            <table width="100%" cellpadding="4">
-              <tr><td style="font-family:'Comic Sans MS',cursive;font-size:11px;color:#ffcc00;width:85px;white-space:nowrap;">Title:</td><td><input type="text" id="docTitle" oninput="updateMeta()" style="width:100%;background:#00000f;border:2px inset #005500;color:#00ffaa;font-family:'Courier New',monospace;font-size:12px;padding:4px;box-sizing:border-box;"></td></tr>
-              <tr><td style="font-family:'Comic Sans MS',cursive;font-size:11px;color:#ffcc00;">Base Path:</td><td><input type="text" id="docBasePath" oninput="updateMeta()" style="width:100%;background:#00000f;border:2px inset #005500;color:#00ffaa;font-family:'Courier New',monospace;font-size:12px;padding:4px;box-sizing:border-box;"></td></tr>
-              <tr><td style="font-family:'Comic Sans MS',cursive;font-size:11px;color:#ffcc00;">Description:</td><td><textarea id="docDesc" oninput="updateMeta()" style="width:100%;background:#00000f;border:2px inset #005500;color:#aaffaa;font-family:'Comic Sans MS',cursive;font-size:11px;padding:4px;height:48px;resize:none;box-sizing:border-box;"></textarea></td></tr>
-            </table>
-            <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-              <button class="big-btn" style="font-size:11px;padding:5px 12px;" onclick="saveToHistory()">&#128190; Save to DB</button>
-              <select id="exportFormat" style="background:#00001a;border:2px inset #003399;color:#fff;font-family:'Comic Sans MS',cursive;font-size:11px;padding:4px;"><option value="pdf">PDF Export</option><option value="html">HTML Export</option><option value="openapi">OpenAPI 3.0 JSON</option></select>
-              <button class="blue-btn" style="font-size:11px;padding:5px 12px;" onclick="exportDocs(document.getElementById('exportFormat').value)">&#128228; EXPORT!!!</button>
-            </div>
-          </div>
-        </td>
-        <td width="42%">
-          <div class="sec-hdr" style="background:linear-gradient(to right,#330033,#770077,#330033);border-color:#cc44cc;color:#fff;">&#128202; PERFORMANCE METRICS</div>
-          <div class="content-box">
-            <table width="100%" cellpadding="6">
-              <tr><td style="font-family:'Comic Sans MS',cursive;font-size:11px;color:#cc88ff;">&#8987; Parse Time:</td><td style="font-family:'Courier New',monospace;font-size:16px;color:#ff88ff;font-weight:bold;"><span id="metricTime">0.00s</span></td></tr>
-              <tr><td style="font-family:'Comic Sans MS',cursive;font-size:11px;color:#cc88ff;">&#128196; Lines of Code:</td><td style="font-family:'Courier New',monospace;font-size:16px;color:#ff88ff;font-weight:bold;"><span id="metricLOC">0 lines</span></td></tr>
-              <tr><td style="font-family:'Comic Sans MS',cursive;font-size:11px;color:#cc88ff;">&#128268; Endpoints:</td><td style="font-family:'Courier New',monospace;font-size:16px;color:#ff88ff;font-weight:bold;"><span id="metricEndpoints">0</span></td></tr>
-            </table>
-          </div>
-        </td>
-      </tr></table>
-
-      <div class="sec-hdr">&#128268; ENDPOINTS BROWSER &mdash; CLICK AN ENDPOINT TO VIEW DETAILS</div>
-      <table width="100%" cellpadding="0" cellspacing="0" style="border:3px outset #0044aa;background:#000011;"><tr valign="top">
-        <td width="220" style="background:#00001a;border-right:2px solid #002266;padding:6px;vertical-align:top;">
-          <div style="font-family:'Comic Sans MS',cursive;font-size:10px;color:#333366;margin-bottom:4px;text-align:center;">SELECT AN ENDPOINT</div>
-          <div id="endpointSidebarList" style="max-height:380px;overflow-y:auto;"></div>
-        </td>
-        <td style="padding:10px;vertical-align:top;background:#00000a;">
-          <div id="activeEndpointContent"><div style="text-align:center;padding:40px;color:#222244;font-family:'Comic Sans MS',cursive;font-size:13px;">&larr; Select an endpoint from the list on the left</div></div>
-        </td>
-      </tr></table>
-    </div>
-
-  </td>
-</tr>
-</table>
-
-<div class="star-div" style="padding:6px;background:#000033;border-top:2px solid #002266;border-bottom:2px solid #002266;font-size:15px;">&#10022; &#10022; &#10022; &#10022; &#10022; &#10022; &#10022; &#10022; &#10022; &#10022; &#10022; &#10022; &#10022; &#10022; &#10022; &#10022; &#10022; &#10022;</div>
-
-<a id="ragSection"></a>
-<div id="ragPanel" class="hidden" style="background:linear-gradient(to bottom,#150022,#0a0011);border-top:5px outset #8800cc;border-bottom:5px outset #8800cc;padding:12px;">
-  <div class="sec-hdr" style="background:linear-gradient(to right,#550099,#9900cc,#550099);border-color:#cc44ff;color:#fff;margin-bottom:10px;">&#129302; ASK THE A.I. &mdash; CODE Q&amp;A POWERED BY RAG TECHNOLOGY!!!</div>
-  <table width="100%" cellpadding="8"><tr valign="top">
-    <td width="60%">
-      <div style="font-family:'Comic Sans MS',cursive;font-size:12px;color:#bb88ff;margin-bottom:10px;"><b>HOW IT WORKS:</b> First index your code so the A.I. can read it. Then ask ANY question about your API!!!</div>
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-        <button id="ragIndexBtn" onclick="indexForRag()" style="padding:7px 16px;background:linear-gradient(to bottom,#6600aa,#2a0055);border:3px outset #aa44ff;color:#fff;font-family:'Comic Sans MS',cursive;font-weight:bold;font-size:12px;cursor:pointer;"><span id="ragIndexText">&#9889; Index for Q&amp;A</span><span id="ragIndexSpinner" class="hidden spin-icon">&#9881;</span></button>
-        <span id="ragStatus" style="font-family:'Courier New',monospace;font-size:11px;color:#666688;background:#0a0022;border:1px inset #2a0055;padding:3px 8px;">Not indexed</span>
-      </div>
-      <div style="margin-bottom:8px;">
-        <div style="font-family:'Comic Sans MS',cursive;font-size:11px;color:#9966cc;margin-bottom:4px;">TYPE YOUR QUESTION HERE &mdash; PRESS ENTER OR CLICK ASK!!!</div>
-        <div style="display:flex;gap:6px;">
-          <input id="ragQuestion" type="text" placeholder="e.g. What does the DELETE endpoint return on error?" style="flex:1;background:#0a0022;border:2px inset #550099;color:#cc99ff;font-family:'Comic Sans MS',cursive;font-size:12px;padding:6px;" onkeydown="if(event.key==='Enter') askRag()">
-          <button id="ragAskBtn" onclick="askRag()" style="padding:6px 16px;background:linear-gradient(to bottom,#8800cc,#440066);border:3px outset #cc44ff;color:#ffff00;font-family:'Comic Sans MS',cursive;font-weight:bold;font-size:12px;cursor:pointer;"><span id="ragAskText">ASK!!!</span><span id="ragAskSpinner" class="hidden spin-icon">&#9881;</span></button>
-        </div>
-      </div>
-      <div id="ragAnswerBox" class="hidden">
-        <div style="font-family:'Comic Sans MS',cursive;font-size:11px;color:#ffcc00;margin-bottom:4px;">&#9733; A.I. ANSWER: <span id="ragChunksLabel" style="color:#666;font-size:10px;"></span></div>
-        <div id="ragAnswer" style="background:#0a0022;border:2px inset #550099;color:#cc99ff;font-family:'Comic Sans MS',cursive;font-size:12px;padding:10px;line-height:1.7;white-space:pre-wrap;max-height:200px;overflow-y:auto;"></div>
-      </div>
-    </td>
-    <td width="40%" style="border-left:1px solid #2a0055;">
-      <div style="font-family:'Comic Sans MS',cursive;font-size:11px;color:#9966cc;margin-bottom:6px;">&#9889; TRY THESE QUESTIONS:</div>
-      <div style="display:flex;flex-direction:column;gap:4px;">
-        <button onclick="setQuestion('What endpoints require a request body?')" style="text-align:left;padding:5px 8px;background:#0a0022;border:1px solid #330055;color:#9966cc;font-family:'Comic Sans MS',cursive;font-size:11px;cursor:pointer;">&#9658; What endpoints require a request body?</button>
-        <button onclick="setQuestion('What does the DELETE endpoint do?')" style="text-align:left;padding:5px 8px;background:#0a0022;border:1px solid #330055;color:#9966cc;font-family:'Comic Sans MS',cursive;font-size:11px;cursor:pointer;">&#9658; What does the DELETE endpoint do?</button>
-        <button onclick="setQuestion('Which endpoints return a 404 error?')" style="text-align:left;padding:5px 8px;background:#0a0022;border:1px solid #330055;color:#9966cc;font-family:'Comic Sans MS',cursive;font-size:11px;cursor:pointer;">&#9658; Which endpoints return a 404 error?</button>
-        <button onclick="setQuestion('What query parameters are accepted?')" style="text-align:left;padding:5px 8px;background:#0a0022;border:1px solid #330055;color:#9966cc;font-family:'Comic Sans MS',cursive;font-size:11px;cursor:pointer;">&#9658; What query parameters are accepted?</button>
-      </div>
+<!-- HEADER -->
+<div id="header">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+    <td><span class="logo-text">DocGen<span class="logo-dot">.ai</span></span><span class="tagline">AI-Powered API Documentation Generator</span></td>
+    <td class="header-links" style="vertical-align:bottom;padding-bottom:4px;">
+      <a href="/h2-console" target="_blank">H2 CONSOLE</a><span class="header-sep">|</span>
+      <a href="https://github.com/Yash-2306/DocGen" target="_blank">GITHUB</a><span class="header-sep">|</span>
+      <a href="#ragPanel" onclick="showRagPanel();document.getElementById('ragPanel').scrollIntoView({behavior:'smooth'});return false;">CODE Q&amp;A</a><span class="header-sep">|</span>
+      <a href="#" onclick="alert('DocGen v1.0 - AI-Powered API Documentation Generator');return false;">HELP</a>
     </td>
   </tr></table>
 </div>
 
-<table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(to right,#000022,#000055,#000022);border-top:4px outset #0044aa;">
-<tr><td style="padding:8px 16px;"><span style="font-family:'Comic Sans MS',cursive;font-size:11px;color:#8888cc;">&#9733; DocGen v2.0 &mdash; AI-Powered API Documentation Generator &#9733; &nbsp;|&nbsp; Made with &#9749; and Java</span></td><td align="right" style="padding:8px 16px;"><span style="font-family:'Courier New',monospace;font-size:10px;color:#333355;">Page last updated: January 2026 &nbsp;|&nbsp; &copy; DocGen.com</span></td></tr>
-</table>
+<!-- MAIN NAV -->
+<div id="nav-main">
+  <a class="nav-tab active" href="#" onclick="return false;">GENERATE DOCS</a>
+  <a class="nav-tab" href="#" onclick="document.getElementById('historySection').scrollIntoView({behavior:'smooth'});return false;">HISTORY</a>
+  <a class="nav-tab" href="#" onclick="exportDocs('pdf');return false;">EXPORT PDF</a>
+  <a class="nav-tab" href="#" onclick="showRagPanel();document.getElementById('ragPanel').scrollIntoView({behavior:'smooth'});return false;">CODE Q&amp;A</a>
+</div>
 
-                </div>
-            </div>
-        </div>
-    </section>
+<!-- SUB NAV -->
+<div id="nav-sub">
+  <a class="subnav-link" href="#" onclick="loadDemo();return false;">Load Demo Code</a>
+  <span class="subnav-arrow">&rsaquo;</span>
+  <a class="subnav-link" href="#" onclick="document.getElementById('fileInputHidden').click();return false;">Upload .java File</a>
+  <span class="subnav-arrow">&rsaquo;</span>
+  <a class="subnav-link" href="#" onclick="exportDocs('html');return false;">Export HTML</a>
+  <span class="subnav-arrow">&rsaquo;</span>
+  <a class="subnav-link" href="#" onclick="exportDocs('openapi');return false;">OpenAPI 3.0 JSON</a>
+  <span class="subnav-arrow">&rsaquo;</span>
+  <a class="subnav-link" href="#" onclick="saveToHistory();return false;">Save to History</a>
+</div>
 
-    <!-- JS Logic -->
-    <script>
-        let appState = null;
-        let selectedEndpointIndex = 0;
-        let currentMetrics = null;
+<!-- INPUT BAR -->
+<div id="input-bar">
+  <input type="file" id="fileInputHidden" accept=".java" style="display:none;" onchange="handleFileSelect(event)">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+    <td class="input-label" style="width:150px;">Paste Controller Code:</td>
+    <td style="padding:0 6px;">
+      <textarea id="controllerCode" rows="8" placeholder="// Paste your Spring Boot @RestController source code here...&#10;// Or click 'Load Demo Code' above to try a sample."></textarea>
+    </td>
+    <td style="width:110px;vertical-align:bottom;padding-left:4px;">
+      <button id="generateBtn" class="btn-go" onclick="generateDocumentation()">
+        <span id="btnText">Go!</span>
+        <span id="btnSpinner" class="hidden spinner" style="border-top-color:#FFFFFF;"></span>
+      </button>
+      <button class="btn-small" onclick="loadDemo()">&#9654; Load Demo</button>
+      <button class="btn-small" onclick="document.getElementById('fileInputHidden').click()">&#9654; Upload File</button>
+      <button class="btn-small" onclick="saveToHistory()">&#9654; Save to H2 DB</button>
+    </td>
+  </tr></table>
+</div>
 
-        const controllerCode = document.getElementById("controllerCode");
-        const generateBtn = document.getElementById("generateBtn");
-        const btnText = document.getElementById("btnText");
-        const btnSpinner = document.getElementById("btnSpinner");
-        const emptyState = document.getElementById("emptyState");
-        const docWorkspace = document.getElementById("docWorkspace");
+<!-- 3-COLUMN LAYOUT -->
+<table id="layout-table" cellpadding="0" cellspacing="0" border="0"><tr>
 
-        const docTitle = document.getElementById("docTitle");
-        const docDesc = document.getElementById("docDesc");
-        const docBasePath = document.getElementById("docBasePath");
-        const endpointSidebarList = document.getElementById("endpointSidebarList");
-        const activeEndpointContent = document.getElementById("activeEndpointContent");
+  <!-- LEFT SIDEBAR -->
+  <td class="col-left">
+    <div class="sec-head">DocGen Tools</div>
+    <button class="sidebar-link" onclick="generateDocumentation()">&#9658; Parse &amp; Generate Docs</button>
+    <button class="sidebar-link" onclick="loadDemo()">&#9658; Load Demo Code</button>
+    <button class="sidebar-link" onclick="document.getElementById('fileInputHidden').click()">&#9658; Upload .java File</button>
+    <button class="sidebar-link" onclick="saveToHistory()">&#9658; Save to H2 Database</button>
+    <hr class="divider">
+    <div class="sec-head">Export Options</div>
+    <button class="sidebar-link" onclick="exportDocs('pdf')">&#9658; Download as PDF</button>
+    <button class="sidebar-link" onclick="exportDocs('html')">&#9658; Download as HTML</button>
+    <button class="sidebar-link" onclick="exportDocs('openapi')">&#9658; OpenAPI 3.0 JSON</button>
+    <hr class="divider">
+    <div class="sec-head">Endpoints</div>
+    <div id="endpointSidebarList"><div class="empty-state" style="padding:6px 0;font-size:10px;">Parse code to see endpoints here.</div></div>
+  </td>
 
-        const metricTime = document.getElementById("metricTime");
-        const metricLOC = document.getElementById("metricLOC");
-        const metricEndpoints = document.getElementById("metricEndpoints");
+  <!-- CENTER CONTENT -->
+  <td class="col-center">
+    <div id="emptyState">
+      <div class="info-banner">
+        <strong>Welcome to DocGen!</strong><br><br>
+        Paste your Spring Boot <code>@RestController</code> source code above and click <strong>Go!</strong> to generate structured API documentation using <strong>Gemini AI</strong>.<br><br>
+        <strong>What DocGen generates:</strong>
+        <ul style="margin:5px 0 0 18px;padding:0;">
+          <li>All REST endpoints with HTTP method and path</li>
+          <li>Headers, path variables, and query parameters</li>
+          <li>Request body schema with example JSON</li>
+          <li>Response status codes with example payloads</li>
+        </ul>
+      </div>
+      <div class="empty-state" style="padding:30px 10px;">
+        <div style="font-size:36px;margin-bottom:8px;">&#128196;</div>
+        Paste Spring Boot controller code above, then click <strong>Go!</strong>
+      </div>
+    </div>
 
-        // Load History List on Boot
-        window.addEventListener("load", loadHistory);
+    <div id="docWorkspace" class="hidden">
+      <div class="sec-head" style="margin-bottom:6px;">
+        API Documentation
+        <span style="float:right;font-size:10px;font-weight:normal;color:#666666;">
+          <span id="metricEndpoints">0</span> endpoints &nbsp;&bull;&nbsp;
+          <span id="metricLOC">0 lines</span> &nbsp;&bull;&nbsp;
+          parsed in <span id="metricTime">0.00s</span>
+        </span>
+      </div>
+      <table width="100%" cellpadding="3" cellspacing="2" border="0" style="margin-bottom:8px;background:#FAFAFA;border:1px solid #DDDDDD;">
+        <tr>
+          <td style="font-size:10px;font-weight:bold;color:#666666;width:60px;">Title:</td>
+          <td><input type="text" id="docTitle" class="editable-field" style="width:280px;" oninput="updateMeta()"></td>
+          <td style="font-size:10px;font-weight:bold;color:#666666;width:70px;padding-left:10px;">Base Path:</td>
+          <td><input type="text" id="docBasePath" class="editable-field" style="width:140px;" oninput="updateMeta()"></td>
+        </tr>
+        <tr>
+          <td style="font-size:10px;font-weight:bold;color:#666666;">Description:</td>
+          <td colspan="3"><input type="text" id="docDesc" class="editable-field" oninput="updateMeta()"></td>
+        </tr>
+      </table>
+      <div style="margin-bottom:8px;">
+        <button class="btn-inline" onclick="saveToHistory()">&#128190; Save to DB</button>
+        <button class="btn-inline" onclick="exportDocs('pdf')">&#128196; PDF</button>
+        <button class="btn-inline" onclick="exportDocs('html')">&#127758; HTML</button>
+        <button class="btn-inline" onclick="exportDocs('openapi')">{ } OpenAPI</button>
+      </div>
+      <div id="activeEndpointContent"><div class="empty-state">Select an endpoint from the left panel.</div></div>
+    </div>
+  </td>
 
-        async function loadHistory() {
-            try {
-                const response = await fetch("/api/history");
-                if (response.ok) {
-                    const list = await response.json();
-                    renderHistory(list);
-                }
-            } catch (err) {
-                console.error("Failed to load history:", err);
-            }
-        }
+  <!-- RIGHT SIDEBAR -->
+  <td class="col-right">
+    <div class="sec-head">Quick Stats</div>
+    <div class="metric-box">Endpoints: <span class="metric-val" id="rightMetricEndpoints">0</span></div>
+    <div class="metric-box">Lines: <span class="metric-val" id="rightMetricLOC">0</span></div>
+    <div class="metric-box">Parse Time: <span class="metric-val" id="rightMetricTime">&#8212;</span></div>
+    <hr class="divider">
+    <div class="sec-head" id="historySection">History</div>
+    <div id="historyList"><div style="font-size:10px;color:#999999;padding:3px;">No saved documents.</div></div>
+    <button class="sidebar-link" onclick="loadHistory()" style="font-size:10px;margin-top:4px;">&#8635; Refresh History</button>
+    <hr class="divider">
+    <div class="sec-head-green">&#9733; Pro Tip</div>
+    <div style="font-size:10px;color:#333333;background:#FFFFCC;border:1px solid #CCCC99;padding:5px;line-height:1.5;">
+      After parsing, click <strong>Code Q&amp;A</strong> in the nav to ask questions like <em>&ldquo;What does the DELETE endpoint return on error?&rdquo;</em>
+    </div>
+  </td>
 
-        function renderHistory(list) {
-            const container = document.getElementById("historyList");
-            container.innerHTML = "";
-            if (!list || list.length === 0) {
-                container.innerHTML = `<div class="text-center py-6 text-xs text-slate-600 italic">No history found.</div>`;
-                return;
-            }
+</tr></table>
 
-            list.forEach(item => {
-                const div = document.createElement("div");
-                div.className = "flex items-center justify-between bg-slate-950 border border-slate-850/60 rounded-lg p-2.5 group hover:border-slate-700 transition-colors";
-                
-                div.innerHTML = `
-                    <div class="flex-1 cursor-pointer min-w-0 pr-2" onclick="loadHistoryItem(${JSON.stringify(item).replace(/"/g, '&quot;')})">
-                        <p class="text-xs font-semibold text-slate-300 truncate">${item.title}</p>
-                        <p class="text-[10px] text-slate-500 font-mono mt-0.5">${item.linesOfCode} LOC // ${(item.parsingTimeMs / 1000).toFixed(2)}s</p>
-                    </div>
-                    <button onclick="deleteHistoryItem(${item.id}, event)" class="text-slate-600 hover:text-red-500 transition-colors p-1" title="Delete from H2">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                    </button>
-                `;
-                container.appendChild(div);
-            });
-        }
+<!-- RAG PANEL -->
+<div id="ragPanel">
+  <div style="padding:8px 10px;">
+    <div class="sec-head-full">
+      Code Q&amp;A
+      <span style="font-size:11px;font-weight:normal;color:#666666;"> &mdash; Ask questions about the indexed controller code</span>
+      <span style="float:right;font-size:11px;">
+        <span id="ragStatus" class="rag-status">Not indexed</span>
+        &nbsp;
+        <button id="ragIndexBtn" class="btn-index" onclick="indexForRag()">
+          <span id="ragIndexText">Index for Q&amp;A</span>
+          <span id="ragIndexSpinner" class="hidden spinner"></span>
+        </button>
+      </span>
+    </div>
+    <div style="padding:8px 0 4px 0;">
+      <table width="100%" cellpadding="2" cellspacing="0" border="0"><tr>
+        <td style="font-size:11px;font-weight:bold;width:110px;white-space:nowrap;">Ask a question:</td>
+        <td><input type="text" id="ragQuestion" style="width:100%;border:1px solid #999999;padding:4px;font-size:11px;font-family:Verdana,Arial;" placeholder="e.g. What does the DELETE endpoint return on error?" onkeydown="if(event.key==='Enter') askRag()"></td>
+        <td style="padding-left:5px;white-space:nowrap;">
+          <button id="ragAskBtn" class="btn-ask" onclick="askRag()">
+            <span id="ragAskText">Ask</span>
+            <span id="ragAskSpinner" class="hidden spinner" style="border-top-color:#FFFFFF;"></span>
+          </button>
+        </td>
+      </tr></table>
+      <div style="padding:4px 0;font-size:10px;">
+        <strong>Try:</strong>
+        &nbsp;<a style="color:#003399;font-size:10px;" href="#" onclick="setQuestion('What endpoints require a request body?');return false;">What endpoints require a request body?</a>
+        <span class="subnav-arrow">&rsaquo;</span>
+        <a style="color:#003399;font-size:10px;" href="#" onclick="setQuestion('What does the DELETE endpoint do?');return false;">What does DELETE do?</a>
+        <span class="subnav-arrow">&rsaquo;</span>
+        <a style="color:#003399;font-size:10px;" href="#" onclick="setQuestion('Which endpoints return a 404 error?');return false;">Which return 404?</a>
+        <span class="subnav-arrow">&rsaquo;</span>
+        <a style="color:#003399;font-size:10px;" href="#" onclick="setQuestion('What query parameters are accepted?');return false;">What query params exist?</a>
+      </div>
+      <div id="ragAnswerBox" class="hidden" style="margin-top:6px;">
+        <div class="sec-head" style="font-size:11px;">Answer <span id="ragChunksLabel" style="font-size:10px;font-weight:normal;color:#666666;margin-left:6px;"></span></div>
+        <div id="ragAnswer" style="background:#FFFFEE;border:1px solid #CCCCCC;padding:8px;font-size:11px;line-height:1.6;white-space:pre-wrap;font-family:Verdana,Arial;"></div>
+      </div>
+    </div>
+  </div>
+</div>
 
-        function loadHistoryItem(item) {
-            appState = {
-                title: item.title,
-                description: item.description,
-                basePath: item.basePath,
-                endpoints: JSON.parse(item.endpointsJson)
-            };
-            currentMetrics = {
-                linesOfCode: item.linesOfCode,
-                parsingTimeMs: item.parsingTimeMs,
-                endpointsCount: appState.endpoints.length
-            };
-            
-            selectedEndpointIndex = 0;
-            emptyState.classList.add("hidden");
-            docWorkspace.classList.remove("hidden");
+<!-- FOOTER -->
+<div id="footer">
+  Generated by <strong>DocGen</strong> &mdash; AI-Powered API Documentation Generator &nbsp;|&nbsp;
+  <a href="https://github.com/Yash-2306/DocGen" target="_blank">GitHub</a> &nbsp;|&nbsp;
+  <a href="/h2-console" target="_blank">H2 Database Console</a>
+</div>
 
-            syncStateToUI();
-        }
+<script>
+    let appState = null;
+    let selectedEndpointIndex = 0;
+    let currentMetrics = null;
 
-        async function deleteHistoryItem(id, event) {
-            event.stopPropagation();
-            if (!confirm("Are you sure you want to delete this document from history?")) return;
-            try {
-                const response = await fetch(`/api/history/${id}`, { method: "DELETE" });
-                if (response.ok) {
-                    loadHistory();
-                }
-            } catch (err) {
-                alert("Failed to delete history item: " + err.message);
-            }
-        }
+    const controllerCode = document.getElementById('controllerCode');
+    const generateBtn = document.getElementById('generateBtn');
+    const btnText = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+    const emptyState = document.getElementById('emptyState');
+    const docWorkspace = document.getElementById('docWorkspace');
+    const docTitle = document.getElementById('docTitle');
+    const docDesc = document.getElementById('docDesc');
+    const docBasePath = document.getElementById('docBasePath');
+    const endpointSidebarList = document.getElementById('endpointSidebarList');
+    const activeEndpointContent = document.getElementById('activeEndpointContent');
+    const metricTime = document.getElementById('metricTime');
+    const metricLOC = document.getElementById('metricLOC');
+    const metricEndpoints = document.getElementById('metricEndpoints');
 
-        async function saveToHistory() {
-            if (!appState) return;
-            try {
-                const response = await fetch("/api/save", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        documentation: appState,
-                        metrics: currentMetrics
-                    })
-                });
-                if (response.ok) {
-                    alert("Successfully saved documentation to H2 database!");
-                    loadHistory();
-                } else {
-                    const text = await response.text();
-                    throw new Error(text || "Failed to save");
-                }
-            } catch (err) {
-                alert("Error saving: " + err.message);
-            }
-        }
+    window.addEventListener('load', loadHistory);
 
-        // Load Demo Controller
-        function loadDemo() {
-            controllerCode.value = `package com.example.shop.controller;
-
-import com.example.shop.model.Product;
-import com.example.shop.service.ProductService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
-@RestController
-@RequestMapping("/products")
-public class ProductController {
-
-    private final ProductService productService;
-
-    public ProductController(ProductService productService) {
-        this.productService = productService;
+    function updateRightMetrics() {
+        if (!currentMetrics) return;
+        const re = document.getElementById('rightMetricEndpoints');
+        const rl = document.getElementById('rightMetricLOC');
+        const rt = document.getElementById('rightMetricTime');
+        if (re) re.textContent = currentMetrics.endpointsCount || 0;
+        if (rl) rl.textContent = currentMetrics.linesOfCode || 0;
+        if (rt) rt.textContent = ((currentMetrics.parsingTimeMs || 0) / 1000).toFixed(2) + 's';
     }
 
-    /**
-     * Get all active products with pagination and category filter.
-     */
-    @GetMapping
-    public List<Product> getProducts(
-            @RequestHeader("X-Tenant-Id") String tenantId,
-            @RequestParam(value = "category", required = false) String category,
-            @RequestParam(value = "limit", defaultValue = "20") int limit) {
-        return productService.findAll(tenantId, category, limit);
+    async function loadHistory() {
+        try {
+            const response = await fetch('/api/history');
+            if (response.ok) { const list = await response.json(); renderHistory(list); }
+        } catch (err) { console.error('Failed to load history:', err); }
     }
 
-    /**
-     * Retrieve details of a specific product by ID.
-     */
-    @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable("id") Long id) {
-        Product p = productService.findById(id);
-        if (p == null) {
-            return ResponseEntity.notFound().build();
+    function renderHistory(list) {
+        const container = document.getElementById('historyList');
+        container.innerHTML = '';
+        if (!list || list.length === 0) {
+            container.innerHTML = '<div style="font-size:10px;color:#999;padding:3px;font-style:italic;">No saved documents.</div>';
+            return;
         }
-        return ResponseEntity.ok(p);
+        list.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'hist-item';
+            div.innerHTML = '<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>' +
+                '<td><span class="hist-link">' + (item.title || 'Untitled') + '</span>' +
+                '<div class="hist-meta">' + item.linesOfCode + ' LOC &bull; ' + (item.parsingTimeMs/1000).toFixed(2) + 's</div></td>' +
+                '<td style="width:24px;text-align:right;vertical-align:top;">' +
+                '<button class="btn-del" onclick="deleteHistoryItem(' + item.id + ',event)">X</button>' +
+                '</td></tr></table>';
+            div.querySelector('.hist-link').onclick = () => loadHistoryItem(item);
+            container.appendChild(div);
+        });
     }
 
-    /**
-     * Add a new product to the catalog.
-     */
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Product createProduct(
-            @RequestHeader("X-Tenant-Id") String tenantId,
-            @RequestBody Product product) {
-        return productService.save(tenantId, product);
+    function loadHistoryItem(item) {
+        appState = { title:item.title, description:item.description, basePath:item.basePath, endpoints:JSON.parse(item.endpointsJson) };
+        currentMetrics = { linesOfCode:item.linesOfCode, parsingTimeMs:item.parsingTimeMs, endpointsCount:appState.endpoints.length };
+        selectedEndpointIndex = 0;
+        emptyState.classList.add('hidden'); docWorkspace.classList.remove('hidden');
+        syncStateToUI(); window.scrollTo(0,0);
     }
 
-    /**
-     * Delete a product by its ID.
-     */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable("id") Long id) {
-        productService.deleteById(id);
-        return ResponseEntity.noContent().build();
+    async function deleteHistoryItem(id, event) {
+        event.stopPropagation();
+        if (!confirm('Delete this document?')) return;
+        try { const r = await fetch('/api/history/'+id,{method:'DELETE'}); if(r.ok) loadHistory(); }
+        catch (err) { alert('Failed to delete: '+err.message); }
     }
-}`;
+
+    async function saveToHistory() {
+        if (!appState) { alert('Generate documentation first!'); return; }
+        try {
+            const r = await fetch('/api/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({documentation:appState,metrics:currentMetrics})});
+            if(r.ok) { alert('Saved to H2 database!'); loadHistory(); }
+            else { const t=await r.text(); throw new Error(t||'Failed'); }
+        } catch(err) { alert('Error saving: '+err.message); }
+    }
+
+    function loadDemo() {
+        controllerCode.value = 'package com.example.shop.controller;\n\nimport org.springframework.http.ResponseEntity;\nimport org.springframework.web.bind.annotation.*;\n\n@RestController\n@RequestMapping("/products")\npublic class ProductController {\n\n    @GetMapping\n    public ResponseEntity<?> getProducts(@RequestHeader("X-Tenant-Id") String tenantId, @RequestParam(required=false) String category) {\n        return ResponseEntity.ok(productService.findAll(tenantId, category));\n    }\n\n    @GetMapping("/{id}")\n    public ResponseEntity<?> getProductById(@PathVariable Long id) {\n        return ResponseEntity.ok(productService.findById(id));\n    }\n\n    @PostMapping\n    public ResponseEntity<?> createProduct(@RequestHeader("X-Tenant-Id") String tenantId, @RequestBody Product product) {\n        return ResponseEntity.ok(productService.save(tenantId, product));\n    }\n\n    @DeleteMapping("/{id}")\n    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {\n        productService.deleteById(id);\n        return ResponseEntity.noContent().build();\n    }\n}';
+    }
+
+    function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (file) { const r=new FileReader(); r.onload=e=>{controllerCode.value=e.target.result;}; r.readAsText(file); }
+    }
+
+    async function generateDocumentation() {
+        const code = controllerCode.value.trim();
+        if (!code) { alert('Please paste Spring Boot Controller code first!'); return; }
+        generateBtn.disabled=true; btnText.textContent='Parsing...'; btnSpinner.classList.remove('hidden');
+        try {
+            const resp = await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({controllerCode:code})});
+            if(!resp.ok){const t=await resp.text();throw new Error(t||'Parsing failed');}
+            const d = await resp.json();
+            appState=d.documentation; currentMetrics=d.metrics; selectedEndpointIndex=0;
+            emptyState.classList.add('hidden'); docWorkspace.classList.remove('hidden');
+            syncStateToUI(); showRagPanel(); loadHistory();
+        } catch(err){alert('Error parsing: '+err.message);}
+        finally{generateBtn.disabled=false;btnText.textContent='Go!';btnSpinner.classList.add('hidden');}
+    }
+
+    function syncStateToUI() {
+        docTitle.value=appState.title||'API Documentation';
+        docDesc.value=appState.description||'';
+        docBasePath.value=appState.basePath||'';
+        metricTime.textContent=currentMetrics?(currentMetrics.parsingTimeMs/1000).toFixed(2)+'s':'0.00s';
+        metricLOC.textContent=currentMetrics?currentMetrics.linesOfCode+' lines':'0 lines';
+        metricEndpoints.textContent=currentMetrics?currentMetrics.endpointsCount:'0';
+        updateRightMetrics(); renderSidebar(); renderActiveEndpoint();
+    }
+
+    function renderSidebar() {
+        endpointSidebarList.innerHTML='';
+        if(!appState||!appState.endpoints||!appState.endpoints.length){
+            endpointSidebarList.innerHTML='<div class="empty-state" style="padding:6px 0;font-size:10px;">No endpoints found.</div>'; return;
         }
+        appState.endpoints.forEach((ep,idx)=>{
+            const m=(ep.method||'GET').toUpperCase();
+            const d=document.createElement('div');
+            d.className='ep-item'+(idx===selectedEndpointIndex?' selected':'');
+            d.onclick=()=>selectEndpoint(idx);
+            d.innerHTML='<span class="method-badge m-'+m.toLowerCase()+'">'+m+'</span> <span class="ep-path-text">'+(ep.path||'/')+'</span>';
+            endpointSidebarList.appendChild(d);
+        });
+    }
 
-        function handleFileSelect(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    controllerCode.value = evt.target.result;
-                };
-                reader.readAsText(file);
-            }
-        }
+    function selectEndpoint(idx){selectedEndpointIndex=idx;renderSidebar();renderActiveEndpoint();}
+    function updateMeta(){if(!appState)return;appState.title=docTitle.value;appState.description=docDesc.value;appState.basePath=docBasePath.value;}
 
-        async function generateDocumentation() {
-            const code = controllerCode.value.trim();
-            if (!code) {
-                alert("Please paste some Spring Boot Controller code first!");
-                return;
-            }
+    function esc(s){
+        if(!s)return'';
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
 
-            generateBtn.disabled = true;
-            btnText.textContent = "Parsing...";
-            btnSpinner.classList.remove("hidden");
+    function renderActiveEndpoint(){
+        activeEndpointContent.innerHTML='';
+        if(!appState||!appState.endpoints||!appState.endpoints.length)return;
+        const ep=appState.endpoints[selectedEndpointIndex];
+        const m=(ep.method||'GET').toUpperCase();
+        let h='<table width="100%" cellpadding="3" cellspacing="0" border="0" style="margin-bottom:8px;border-bottom:2px solid #CC9900;"><tr><td>'+
+            '<span class="method-badge m-'+m.toLowerCase()+'" style="font-size:12px;padding:2px 6px;">'+m+'</span> '+
+            '<input type="text" value="'+esc(ep.path)+'" oninput="updateEpField(\'path\',this.value)" style="font-family:Courier New,monospace;font-size:13px;font-weight:bold;border:none;background:transparent;width:60%;" class="param-input">'+
+            '</td></tr><tr><td>'+
+            '<div><span style="font-size:10px;font-weight:bold;color:#666;text-transform:uppercase;">Summary:</span> '+
+            '<input type="text" value="'+esc(ep.summary||'')+'" oninput="updateEpField(\'summary\',this.value)" style="font-size:12px;font-weight:bold;border:none;background:transparent;width:80%;" class="param-input"></div>'+
+            '<div><span style="font-size:10px;font-weight:bold;color:#666;text-transform:uppercase;">Description:</span> '+
+            '<input type="text" value="'+esc(ep.description||'')+'" oninput="updateEpField(\'description\',this.value)" style="font-size:11px;color:#555;border:none;background:transparent;width:80%;" class="param-input"></div>'+
+            '</td></tr></table>';
+        h+=renderParametersGroup('Headers',ep.headers,'headers');
+        h+=renderParametersGroup('Path Variables',ep.pathVariables,'pathVariables');
+        h+=renderParametersGroup('Query Parameters',ep.queryParams,'queryParams');
+        const rb=ep.requestBody||{contentType:'application/json',description:'',exampleJson:''};
+        h+='<div class="detail-label">Request Payload '+
+            '<span style="float:right;font-weight:normal;font-family:Courier New,monospace;font-size:10px;color:#999;">'+
+            '<input type="text" value="'+esc(rb.contentType||'application/json')+'" oninput="updateReqBodyField(\'contentType\',this.value)" style="border:none;background:transparent;text-align:right;font-family:Courier New,monospace;font-size:10px;color:#999;width:160px;" class="param-input"></span></div>'+
+            '<input type="text" value="'+esc(rb.description||'')+'" oninput="updateReqBodyField(\'description\',this.value)" class="editable-field" placeholder="Payload description..." style="margin-bottom:4px;">'+
+            '<textarea oninput="updateReqBodyField(\'exampleJson\',this.value)" style="width:100%;height:80px;border:1px solid #CCC;background:#FFFFEE;font-family:Courier New,monospace;font-size:11px;padding:5px;resize:vertical;">'+esc(rb.exampleJson||'')+'</textarea>';
+        h+='<div class="detail-label" style="margin-top:10px;">Responses '+
+            '<button onclick="addResponse()" style="float:right;font-size:10px;color:#003399;background:none;border:none;cursor:pointer;text-decoration:underline;">+ Add Response</button></div>';
+        if(ep.responses&&ep.responses.length>0){ep.responses.forEach((r,i)=>{
+            const sc=r.statusCode;
+            const sc2=sc>=500?'s-5xx':sc>=400?'s-4xx':sc>=300?'s-3xx':'s-2xx';
+            h+='<div class="resp-box"><table width="100%" cellpadding="2" cellspacing="0" border="0"><tr>'+
+                '<td style="width:50px;"><span class="'+sc2+'">'+sc+'</span></td>'+
+                '<td><input type="number" value="'+sc+'" oninput="updateResponseField('+i+',\'statusCode\',this.value)" style="width:50px;border:1px solid #CCC;font-weight:bold;font-family:Courier New,monospace;font-size:11px;padding:1px 3px;">'+
+                '<input type="text" value="'+esc(r.description||'')+'" oninput="updateResponseField('+i+',\'description\',this.value)" style="width:60%;border:1px solid #CCC;font-size:11px;padding:1px 3px;margin-left:4px;"></td>'+
+                '<td style="text-align:right;white-space:nowrap;"><span style="font-size:10px;color:#999;font-family:Courier New,monospace;">'+esc(r.contentType||'')+'</span>'+
+                '<button onclick="deleteResponse('+i+')" class="btn-del" style="margin-left:4px;">X</button></td></tr></table>'+
+                '<textarea oninput="updateResponseField('+i+',\'exampleJson\',this.value)" style="width:100%;height:60px;margin-top:4px;border:1px solid #CCC;background:#EEEEFF;font-family:Courier New,monospace;font-size:11px;padding:4px;resize:vertical;">'+esc(r.exampleJson||'')+'</textarea></div>';
+        });}else{h+='<div style="font-size:11px;color:#AAAAAA;font-style:italic;padding:4px 0;">No responses configured.</div>';}
+        activeEndpointContent.innerHTML=h;
+    }
 
-            try {
-                const response = await fetch("/api/generate", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ controllerCode: code })
-                });
+    function renderParametersGroup(title,list,keyName){
+        let rows='';
+        if(list&&list.length>0){list.forEach((p,i)=>{rows+=
+            '<tr><td><input type="text" value="'+esc(p.name)+'" oninput="updateParamField(\''+keyName+'\','+i+',\'name\',this.value)" class="param-input" style="color:#006600;font-weight:bold;"></td>'+
+            '<td><input type="text" value="'+esc(p.type)+'" oninput="updateParamField(\''+keyName+'\','+i+',\'type\',this.value)" class="param-input" style="color:#000099;"></td>'+
+            '<td style="text-align:center;"><input type="checkbox" '+(p.required?'checked':'')+' onchange="updateParamField(\''+keyName+'\','+i+',\'required\',this.checked)"></td>'+
+            '<td><input type="text" value="'+esc(p.description||'')+'" oninput="updateParamField(\''+keyName+'\','+i+',\'description\',this.value)" class="param-input"></td>'+
+            '<td style="text-align:right;"><button onclick="deleteParam(\''+keyName+'\','+i+')" class="btn-del">X</button></td></tr>';
+        });}
+        return '<div class="detail-label">'+title+' <button onclick="addParam(\''+keyName+'\')" style="float:right;font-size:10px;color:#003399;background:none;border:none;cursor:pointer;text-decoration:underline;">+ Add</button></div>'+
+            (list&&list.length>0?'<table class="param-table"><thead><tr><th>Name</th><th>Type</th><th style="width:40px;text-align:center;">Req</th><th>Description</th><th style="width:24px;"></th></tr></thead><tbody>'+rows+'</tbody></table>':'<div style="font-size:10px;color:#AAA;font-style:italic;padding:2px 0;">None defined.</div>');
+    }
 
-                if (!response.ok) {
-                    const text = await response.text();
-                    throw new Error(text || "API parsing failed");
-                }
+    function updateEpField(f,v){if(!appState)return;appState.endpoints[selectedEndpointIndex][f]=v;if(f==='path'||f==='summary')renderSidebar();}
+    function updateParamField(g,i,f,v){if(!appState)return;appState.endpoints[selectedEndpointIndex][g][i][f]=v;}
+    function addParam(g){if(!appState)return;if(!appState.endpoints[selectedEndpointIndex][g])appState.endpoints[selectedEndpointIndex][g]=[];appState.endpoints[selectedEndpointIndex][g].push({name:'new_param',type:'string',required:false,description:'',example:''});renderActiveEndpoint();}
+    function deleteParam(g,i){if(!appState)return;appState.endpoints[selectedEndpointIndex][g].splice(i,1);renderActiveEndpoint();}
+    function updateReqBodyField(f,v){if(!appState)return;if(!appState.endpoints[selectedEndpointIndex].requestBody)appState.endpoints[selectedEndpointIndex].requestBody={};appState.endpoints[selectedEndpointIndex].requestBody[f]=v;}
+    function updateResponseField(i,f,v){if(!appState)return;appState.endpoints[selectedEndpointIndex].responses[i][f]=(f==='statusCode')?(parseInt(v)||200):v;}
+    function addResponse(){if(!appState)return;if(!appState.endpoints[selectedEndpointIndex].responses)appState.endpoints[selectedEndpointIndex].responses=[];appState.endpoints[selectedEndpointIndex].responses.push({statusCode:200,description:'Success',contentType:'application/json',exampleJson:'{}'});renderActiveEndpoint();}
+    function deleteResponse(i){if(!appState)return;appState.endpoints[selectedEndpointIndex].responses.splice(i,1);renderActiveEndpoint();}
 
-                const resData = await response.json();
-                appState = resData.documentation;
-                currentMetrics = resData.metrics;
-                selectedEndpointIndex = 0;
+    async function exportDocs(format){
+        if(!appState){alert('Generate documentation first!');return;}
+        try{
+            const r=await fetch('/api/export/'+format,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(appState)});
+            if(!r.ok)throw new Error('Export failed');
+            const blob=await r.blob();const url=window.URL.createObjectURL(blob);
+            const a=document.createElement('a');a.href=url;a.download='api-documentation.'+(format==='openapi'?'json':format);
+            document.body.appendChild(a);a.click();document.body.removeChild(a);window.URL.revokeObjectURL(url);
+        }catch(err){alert('Error during export: '+err.message);}
+    }
 
-                emptyState.classList.add("hidden");
-                docWorkspace.classList.remove("hidden");
+    function showRagPanel(){document.getElementById('ragPanel').style.display='block';}
+    function setQuestion(q){document.getElementById('ragQuestion').value=q;}
 
-                syncStateToUI();
+    async function indexForRag(){
+        const code=document.getElementById('controllerCode').value.trim();
+        if(!code){alert('Paste or load controller code first.');return;}
+        const btn=document.getElementById('ragIndexBtn'),txt=document.getElementById('ragIndexText'),
+              spn=document.getElementById('ragIndexSpinner'),status=document.getElementById('ragStatus');
+        btn.disabled=true;txt.textContent='Indexing...';spn.classList.remove('hidden');
+        status.textContent='Indexing...';status.className='rag-status';
+        try{
+            const res=await fetch('/api/rag/index',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});
+            if(!res.ok){const e=await res.text();throw new Error(e);}
+            const data=await res.json();
+            status.textContent=data.chunksIndexed+' chunks indexed';status.className='rag-status indexed';
+        }catch(err){status.textContent='Index failed';status.className='rag-status';alert('Indexing error: '+err.message);}
+        finally{btn.disabled=false;txt.textContent='Re-index';spn.classList.add('hidden');}
+    }
 
-            } catch (err) {
-                alert("Error parsing: " + err.message);
-            } finally {
-                generateBtn.disabled = false;
-                btnText.textContent = "Parse Code";
-                btnSpinner.classList.add("hidden");
-            }
-        }
-
-        function syncStateToUI() {
-            docTitle.value = appState.title || "API Documentation";
-            docDesc.value = appState.description || "";
-            docBasePath.value = appState.basePath || "";
-
-            metricTime.textContent = currentMetrics ? `${(currentMetrics.parsingTimeMs / 1000).toFixed(2)}s` : "0.00s";
-            metricLOC.textContent = currentMetrics ? `${currentMetrics.linesOfCode} lines` : "0 lines";
-            metricEndpoints.textContent = currentMetrics ? currentMetrics.endpointsCount : "0";
-
-            renderSidebar();
-            renderActiveEndpoint();
-            showRagPanel();
-        }
-
-        function renderSidebar() {
-            endpointSidebarList.innerHTML = "";
-            if (!appState || !appState.endpoints) return;
-
-            appState.endpoints.forEach((ep, idx) => {
-                const btn = document.createElement("button");
-                btn.onclick = () => selectEndpoint(idx);
-                
-                let badgeColor = "bg-teal-500/10 text-teal-500 border-teal-500/20";
-                if (ep.method === "POST") badgeColor = "bg-blue-500/10 text-blue-500 border-blue-500/20";
-                else if (ep.method === "PUT") badgeColor = "bg-orange-500/10 text-orange-500 border-orange-500/20";
-                else if (ep.method === "DELETE") badgeColor = "bg-red-500/10 text-red-500 border-red-500/20";
-
-                const isSelected = idx === selectedEndpointIndex;
-                btn.className = `flex flex-col text-left p-3 rounded-lg border transition-colors ${
-                    isSelected 
-                    ? "bg-slate-950 border-slate-700 shadow-sm ring-1 ring-blue-500/20" 
-                    : "border-transparent hover:bg-slate-950/60 hover:border-slate-850/60 text-slate-400 hover:text-slate-200"
-                }`;
-
-                btn.innerHTML = `
-                    <div class="flex items-center gap-2 mb-1 w-full">
-                        <span class="px-1.5 py-0.5 text-[9px] font-extrabold border rounded uppercase ${badgeColor}">${ep.method}</span>
-                        <span class="font-mono text-[11px] font-semibold truncate flex-1 text-slate-300">${ep.path}</span>
-                    </div>
-                    <span class="text-[10px] font-medium truncate w-full ${isSelected ? 'text-slate-300' : 'text-slate-500'}">${ep.summary || 'Endpoint'}</span>
-                `;
-                endpointSidebarList.appendChild(btn);
-            });
-        }
-
-        function selectEndpoint(idx) {
-            selectedEndpointIndex = idx;
-            renderSidebar();
-            renderActiveEndpoint();
-        }
-
-        function updateMeta() {
-            if (!appState) return;
-            appState.title = docTitle.value;
-            appState.description = docDesc.value;
-            appState.basePath = docBasePath.value;
-        }
-
-        function renderActiveEndpoint() {
-            activeEndpointContent.innerHTML = "";
-            if (!appState || !appState.endpoints || appState.endpoints.length === 0) return;
-
-            const ep = appState.endpoints[selectedEndpointIndex];
-
-            let methodBadgeColor = "bg-teal-500/10 text-teal-500 border-teal-500/20";
-            if (ep.method === "POST") methodBadgeColor = "bg-blue-500/10 text-blue-500 border-blue-500/20";
-            else if (ep.method === "PUT") methodBadgeColor = "bg-orange-500/10 text-orange-500 border-orange-500/20";
-            else if (ep.method === "DELETE") methodBadgeColor = "bg-red-500/10 text-red-500 border-red-500/20";
-
-            let html = `
-                <!-- Title Row -->
-                <div class="space-y-4">
-                    <div class="flex items-center gap-3">
-                        <span class="px-2 py-0.5 text-xs font-bold border rounded uppercase ${methodBadgeColor}">${ep.method}</span>
-                        <input type="text" value="${ep.path}" oninput="updateEpField('path', this.value)" class="bg-slate-950 border border-slate-850 rounded px-2.5 py-1 font-mono font-semibold text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 flex-1 text-xs" placeholder="/endpoint-path">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-[9px] text-slate-500 uppercase tracking-wider font-extrabold block">Operation Summary</label>
-                        <input type="text" value="${ep.summary || ''}" oninput="updateEpField('summary', this.value)" class="w-full bg-slate-950 border border-slate-850 rounded px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="Short description of this operation">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-[9px] text-slate-500 uppercase tracking-wider font-extrabold block">Description</label>
-                        <textarea oninput="updateEpField('description', this.value)" class="w-full bg-slate-950 text-xs text-slate-400 rounded-lg p-2.5 border border-slate-850 focus:outline-none focus:ring-1 focus:ring-blue-500 h-16 resize-none" placeholder="Detailed operation details...">${ep.description || ''}</textarea>
-                    </div>
-                </div>
-            `;
-
-            html += renderParametersGroup("Headers", ep.headers, "headers");
-            html += renderParametersGroup("Path Variables", ep.pathVariables, "pathVariables");
-            html += renderParametersGroup("Query Parameters", ep.queryParams, "queryParams");
-
-            const reqBody = ep.requestBody || { contentType: "application/json", description: "", exampleJson: "" };
-            html += `
-                <div class="border-t border-slate-850 pt-5 space-y-3">
-                    <div class="flex items-center justify-between">
-                        <h4 class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Request Payload</h4>
-                        <input type="text" value="${reqBody.contentType || 'application/json'}" oninput="updateReqBodyField('contentType', this.value)" class="bg-transparent font-mono text-[10px] text-slate-500 text-right border-b border-dashed border-slate-800 focus:outline-none focus:border-blue-500 w-36" placeholder="application/json">
-                    </div>
-                    <input type="text" value="${reqBody.description || ''}" oninput="updateReqBodyField('description', this.value)" class="w-full bg-slate-950 border border-slate-850 rounded px-2.5 py-1.5 text-xs text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="Payload details...">
-                    <textarea oninput="updateReqBodyField('exampleJson', this.value)" class="w-full bg-slate-950 code-font text-xs text-teal-400 rounded-lg p-3 border border-slate-850 focus:outline-none focus:ring-1 focus:ring-blue-500 h-24" placeholder="{\\n  \\\"key\\\": \\\"value\\\"\\n}">${reqBody.exampleJson || ''}</textarea>
-                </div>
-            `;
-
-            html += `
-                <div class="border-t border-slate-850 pt-5 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <h4 class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Responses</h4>
-                        <button onclick="addResponse()" class="text-xs text-blue-500 hover:text-blue-400 font-semibold transition-colors flex items-center gap-1">
-                            + Add Response
-                        </button>
-                    </div>
-                    <div class="space-y-4">
-            `;
-
-            if (ep.responses && ep.responses.length > 0) {
-                ep.responses.forEach((resp, rIdx) => {
-                    let respBadge = "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
-                    if (resp.statusCode >= 400) respBadge = "bg-red-500/10 text-red-500 border-red-500/20";
-                    else if (resp.statusCode >= 300) respBadge = "bg-orange-500/10 text-orange-500 border-orange-500/20";
-
-                    html += `
-                        <div class="bg-slate-950 border border-slate-850/60 rounded-lg p-3.5 space-y-3 relative group/resp">
-                            <button onclick="deleteResponse(${rIdx})" class="absolute top-3.5 right-3.5 text-slate-600 hover:text-red-500 transition-colors">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                            </button>
-                            <div class="flex items-center gap-3">
-                                <span class="px-1.5 py-0.5 text-[10px] font-bold border rounded ${respBadge}">${resp.statusCode}</span>
-                                <input type="number" value="${resp.statusCode}" oninput="updateResponseField(${rIdx}, 'statusCode', this.value)" class="bg-slate-950 border border-slate-850 rounded px-2 py-0.5 focus:outline-none w-14 font-semibold text-xs text-slate-300" placeholder="200">
-                                <input type="text" value="${resp.description || ''}" oninput="updateResponseField(${rIdx}, 'description', this.value)" class="bg-slate-950 border border-slate-850 rounded px-2 py-0.5 focus:outline-none text-xs text-slate-400 flex-1" placeholder="Response description">
-                            </div>
-                            <textarea oninput="updateResponseField(${rIdx}, 'exampleJson', this.value)" class="w-full bg-slate-950 code-font text-xs text-blue-400 rounded-lg p-2.5 border border-slate-850 focus:outline-none focus:ring-1 focus:ring-blue-500 h-20" placeholder="{\\n  \\\"status\\\": \\\"ok\\\"\\n}">${resp.exampleJson || ''}</textarea>
-                        </div>
-                    `;
-                });
-            } else {
-                html += `<p class="text-xs text-slate-600 italic">No responses configured.</p>`;
-            }
-
-            html += `
-                    </div>
-                </div>
-            `;
-
-            activeEndpointContent.innerHTML = html;
-        }
-
-        function renderParametersGroup(title, list, keyName) {
-            let rowHtml = "";
-            if (list && list.length > 0) {
-                list.forEach((item, idx) => {
-                    rowHtml += `
-                        <tr class="group/param border-b border-slate-850/60">
-                            <td class="py-2">
-                                <input type="text" value="${item.name}" oninput="updateParamField('${keyName}', ${idx}, 'name', this.value)" class="bg-transparent font-mono text-teal-400 focus:outline-none border-b border-transparent hover:border-slate-850 focus:border-blue-500 w-full font-semibold">
-                            </td>
-                            <td class="py-2">
-                                <input type="text" value="${item.type}" oninput="updateParamField('${keyName}', ${idx}, 'type', this.value)" class="bg-transparent font-mono text-xs text-slate-400 focus:outline-none border-b border-transparent hover:border-slate-850 w-full">
-                            </td>
-                            <td class="py-2 text-center">
-                                <input type="checkbox" ${item.required ? 'checked' : ''} onchange="updateParamField('${keyName}', ${idx}, 'required', this.checked)" class="rounded bg-slate-950 border-slate-850 text-blue-600 focus:ring-0">
-                            </td>
-                            <td class="py-2">
-                                <input type="text" value="${item.description || ''}" oninput="updateParamField('${keyName}', ${idx}, 'description', this.value)" class="bg-transparent text-xs text-slate-400 focus:outline-none border-b border-transparent hover:border-slate-850 w-full" placeholder="Explanation...">
-                            </td>
-                            <td class="py-2 text-right">
-                                <button onclick="deleteParam('${keyName}', ${idx})" class="text-slate-600 hover:text-red-500 transition-colors opacity-0 group-hover/param:opacity-100">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            }
-
-            return `
-                <div class="border-t border-slate-850 pt-5 space-y-3">
-                    <div class="flex items-center justify-between">
-                        <h4 class="text-[10px] font-bold uppercase tracking-wider text-slate-400">${title}</h4>
-                        <button onclick="addParam('${keyName}')" class="text-xs text-blue-500 hover:text-blue-400 font-semibold transition-colors flex items-center gap-0.5">
-                            + Add Item
-                        </button>
-                    </div>
-                    ${list && list.length > 0 ? `
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full text-left text-xs">
-                            <thead>
-                                <tr class="text-slate-500 font-semibold border-b border-slate-850">
-                                    <th class="pb-1.5 w-1/4">Name</th>
-                                    <th class="pb-1.5 w-1/5">Type</th>
-                                    <th class="pb-1.5 text-center w-12">Req</th>
-                                    <th class="pb-1.5">Description</th>
-                                    <th class="pb-1.5 text-right w-8"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${rowHtml}
-                            </tbody>
-                        </table>
-                    </div>
-                    ` : `<p class="text-[11px] text-slate-600 italic">None defined.</p>`}
-                </div>
-            `;
-        }
-
-        function updateEpField(field, value) {
-            if (!appState) return;
-            appState.endpoints[selectedEndpointIndex][field] = value;
-            if (field === 'path' || field === 'summary') {
-                renderSidebar();
-            }
-        }
-
-        function updateParamField(group, idx, field, value) {
-            if (!appState) return;
-            appState.endpoints[selectedEndpointIndex][group][idx][field] = value;
-        }
-
-        function addParam(group) {
-            if (!appState) return;
-            if (!appState.endpoints[selectedEndpointIndex][group]) {
-                appState.endpoints[selectedEndpointIndex][group] = [];
-            }
-            appState.endpoints[selectedEndpointIndex][group].push({
-                name: "new_param",
-                type: "string",
-                required: false,
-                description: "",
-                example: ""
-            });
-            renderActiveEndpoint();
-        }
-
-        function deleteParam(group, idx) {
-            if (!appState) return;
-            appState.endpoints[selectedEndpointIndex][group].splice(idx, 1);
-            renderActiveEndpoint();
-        }
-
-        function updateReqBodyField(field, value) {
-            if (!appState) return;
-            if (!appState.endpoints[selectedEndpointIndex].requestBody) {
-                appState.endpoints[selectedEndpointIndex].requestBody = {};
-            }
-            appState.endpoints[selectedEndpointIndex].requestBody[field] = value;
-        }
-
-        function updateResponseField(rIdx, field, value) {
-            if (!appState) return;
-            if (field === 'statusCode') {
-                appState.endpoints[selectedEndpointIndex].responses[rIdx][field] = parseInt(value) || 200;
-            } else {
-                appState.endpoints[selectedEndpointIndex].responses[rIdx][field] = value;
-            }
-        }
-
-        function addResponse() {
-            if (!appState) return;
-            if (!appState.endpoints[selectedEndpointIndex].responses) {
-                appState.endpoints[selectedEndpointIndex].responses = [];
-            }
-            appState.endpoints[selectedEndpointIndex].responses.push({
-                statusCode: 200,
-                description: "Success description",
-                contentType: "application/json",
-                exampleJson: "{}"
-            });
-            renderActiveEndpoint();
-        }
-
-        function deleteResponse(idx) {
-            if (!appState) return;
-            appState.endpoints[selectedEndpointIndex].responses.splice(idx, 1);
-            renderActiveEndpoint();
-        }
-
-        async function exportDocs(format) {
-            if (!appState) return;
-            try {
-                const response = await fetch(`/api/export/${format}`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(appState)
-                });
-
-                if (!response.ok) throw new Error(`Export to ${format} failed.`);
-
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `api-documentation.${format === 'openapi' ? 'json' : format}`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-            } catch (err) {
-                alert("Error during export: " + err.message);
-            }
-        }
-
-        // =====================================================================
-        // RAG â€” Code Q&A Functions
-        // =====================================================================
-
-        function showRagPanel() {
-            document.getElementById('ragPanel').classList.remove('hidden');
-        }
-
-        function setQuestion(q) {
-            document.getElementById('ragQuestion').value = q;
-        }
-
-        async function indexForRag() {
-            const code = document.getElementById('controllerCode').value.trim();
-            if (!code) {
-                alert('Please paste or load controller code first, then click Index for Q&A.');
-                return;
-            }
-            const btn = document.getElementById('ragIndexBtn');
-            const txt = document.getElementById('ragIndexText');
-            const spinner = document.getElementById('ragIndexSpinner');
-            const status = document.getElementById('ragStatus');
-
-            btn.disabled = true;
-            txt.textContent = 'Indexing...';
-            spinner.classList.remove('hidden');
-            status.textContent = 'Indexing...';
-            status.className = 'text-[10px] font-mono text-blue-500 bg-slate-950 border border-slate-850 px-2 py-1 rounded';
-
-            try {
-                const res = await fetch('/api/rag/index', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code })
-                });
-                if (!res.ok) {
-                    const errText = await res.text();
-                    throw new Error(errText);
-                }
-                const data = await res.json();
-                status.textContent = `${data.chunksIndexed} chunks indexed`;
-                status.className = 'text-[10px] font-mono text-emerald-500 bg-slate-950 border border-slate-850 px-2 py-1 rounded';
-            } catch (err) {
-                status.textContent = 'Index failed';
-                status.className = 'text-[10px] font-mono text-red-500 bg-slate-950 border border-slate-850 px-2 py-1 rounded';
-                alert('Indexing error: ' + err.message);
-            } finally {
-                btn.disabled = false;
-                txt.textContent = 'Re-index';
-                spinner.classList.add('hidden');
-            }
-        }
-
-        async function askRag() {
-            const question = document.getElementById('ragQuestion').value.trim();
-            if (!question) return;
-
-            const askBtn = document.getElementById('ragAskBtn');
-            const askTxt = document.getElementById('ragAskText');
-            const askSpinner = document.getElementById('ragAskSpinner');
-            const answerBox = document.getElementById('ragAnswerBox');
-            const answerEl = document.getElementById('ragAnswer');
-            const chunksLabel = document.getElementById('ragChunksLabel');
-
-            askBtn.disabled = true;
-            askTxt.textContent = 'Thinking...';
-            askSpinner.classList.remove('hidden');
-            answerBox.classList.add('hidden');
-
-            try {
-                const res = await fetch('/api/rag/ask', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question })
-                });
-                const data = await res.json();
-                answerEl.textContent = data.answer;
-                chunksLabel.textContent = `(retrieved ${data.chunksRetrieved} relevant chunk${data.chunksRetrieved !== 1 ? 's' : ''})`;
-                answerBox.classList.remove('hidden');
-            } catch (err) {
-                answerEl.textContent = 'Error: ' + err.message;
-                answerBox.classList.remove('hidden');
-            } finally {
-                askBtn.disabled = false;
-                askTxt.textContent = 'Ask';
-                askSpinner.classList.add('hidden');
-            }
-        }
-    </script>
+    async function askRag(){
+        const q=document.getElementById('ragQuestion').value.trim();if(!q)return;
+        const ab=document.getElementById('ragAskBtn'),at=document.getElementById('ragAskText'),
+              as2=document.getElementById('ragAskSpinner'),box=document.getElementById('ragAnswerBox'),
+              ans=document.getElementById('ragAnswer'),cl=document.getElementById('ragChunksLabel');
+        ab.disabled=true;at.textContent='Thinking...';as2.classList.remove('hidden');box.classList.add('hidden');
+        try{
+            const res=await fetch('/api/rag/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q})});
+            const data=await res.json();
+            ans.textContent=data.answer;
+            cl.textContent='(retrieved '+data.chunksRetrieved+' relevant chunk'+(data.chunksRetrieved!==1?'s':'')+')';
+            box.classList.remove('hidden');
+        }catch(err){ans.textContent='Error: '+err.message;box.classList.remove('hidden');}
+        finally{ab.disabled=false;at.textContent='Ask';as2.classList.add('hidden');}
+    }
+</script>
 </body>
 </html>
