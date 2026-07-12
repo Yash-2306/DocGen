@@ -23,7 +23,7 @@ import java.util.Map;
 public class EmbeddingService {
 
     private static final String EMBEDDING_URL =
-        "https://generativelanguage.googleapis.com/v1/models/text-embedding-004:embedContent";
+        "https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent";
 
     @Value("${gemini.api.key:}")
     private String apiKey;
@@ -42,15 +42,17 @@ public class EmbeddingService {
      * @param text The input text to embed (a code chunk or a question)
      * @return double[] vector of length 768
      * @throws Exception if the Gemini API call fails
+     *
+     * Gemini embedding API spec:
+     *   - Model goes in the URL path only — NOT in the request body.
+     *   - Body only contains: { "content": { "parts": [{"text": "..."}] } }
      */
     public double[] embed(String text) throws Exception {
-        // Build the request body per Gemini embedding API spec
-        Map<String, Object> content = Map.of(
-            "parts", new Object[]{Map.of("text", text)}
-        );
+        // Correct request body — model is in the URL, not here
         Map<String, Object> requestBody = Map.of(
-            "model", "models/text-embedding-004",
-            "content", content
+            "content", Map.of(
+                "parts", new Object[]{Map.of("text", text)}
+            )
         );
 
         String requestJson = objectMapper.writeValueAsString(requestBody);
