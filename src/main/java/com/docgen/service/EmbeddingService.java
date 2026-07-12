@@ -23,7 +23,7 @@ import java.util.Map;
 public class EmbeddingService {
 
     private static final String EMBEDDING_URL =
-        "https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent";
+        "https://generativelanguage.googleapis.com/v1/models/text-embedding-004:embedContent";
 
     @Value("${gemini.api.key:}")
     private String apiKey;
