@@ -859,6 +859,10 @@ public class ProductController {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ code })
                 });
+                if (!res.ok) {
+                    const errText = await res.text();
+                    throw new Error(errText);
+                }
                 const data = await res.json();
                 status.textContent = `${data.chunksIndexed} chunks indexed`;
                 status.className = 'text-[10px] font-mono text-emerald-500 bg-slate-950 border border-slate-850 px-2 py-1 rounded';
