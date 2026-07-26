@@ -31,3 +31,8 @@ target/
 ### OS Stuff ###
 .DS_Store
 Thumbs.db
+
+### Local Secrets — NEVER COMMIT ###
+application-local.properties
+.env
+.env.local
